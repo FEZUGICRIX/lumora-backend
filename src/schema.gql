@@ -1,0 +1,149 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  avatar: String!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Comment {
+  id: ID!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  author: User!
+  authorId: ID!
+  article: Article!
+  articleId: ID!
+}
+
+type Category {
+  id: ID!
+  name: String!
+  articles: [Article!]!
+}
+
+type Article {
+  id: ID!
+  title: String!
+  slug: String!
+  description: String!
+  content: String!
+  tags: [String!]!
+  coverImage: String
+  published: Boolean!
+  publishedAt: DateTime
+  readingTime: Float!
+  views: Float!
+  likes: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  author: User!
+  category: Category!
+  comments: [Comment!]!
+}
+
+type Query {
+  getAllArticles: [Article!]!
+  getArticleBySlug(slug: String!): Article!
+  getAllUsers: [User!]!
+  getUserById(id: ID!): User
+  comment(id: Int!): Comment!
+  getCategories: [Category!]!
+  category(id: Int!): Category!
+}
+
+type Mutation {
+  createArticle(createArticleInput: CreateArticleInput!): Article!
+  updateArticle(updateArticleInput: UpdateArticleInput!): Article!
+  removeArticle(slug: String!): Article!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: Int!): User!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
+  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
+  removeComment(id: Int!): Comment!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  removeCategory(id: Int!): Category!
+}
+
+input CreateArticleInput {
+  title: String!
+  slug: String!
+  description: String
+  content: String!
+  tags: [String!]! = []
+  coverImage: String
+  published: Boolean! = false
+  publishedAt: DateTime
+  readingTime: Int! = 0
+  views: Int! = 0
+  likes: Int! = 0
+  authorId: String!
+  categoryId: String
+}
+
+input UpdateArticleInput {
+  title: String
+  slug: String!
+  description: String
+  content: String
+  tags: [String!] = []
+  coverImage: String
+  published: Boolean = false
+  publishedAt: DateTime
+  readingTime: Int = 0
+  views: Int = 0
+  likes: Int = 0
+  authorId: String
+  categoryId: String
+}
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  avatar: String!
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  avatar: String
+  id: ID!
+}
+
+input CreateCommentInput {
+  content: String
+  authorId: String!
+  articleId: String!
+}
+
+input UpdateCommentInput {
+  content: String
+  authorId: String
+  articleId: String
+  id: ID!
+}
+
+input CreateCategoryInput {
+  name: String!
+}
+
+input UpdateCategoryInput {
+  name: String
+  id: ID!
+}

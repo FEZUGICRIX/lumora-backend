@@ -14,18 +14,69 @@ datasource db {
 }
 
 model Article {
-  id           String   @id @default(uuid())
-  title        String
-  slug         String   @unique
-  summary      String?
-  content      String
-  tags         String[] @default([])
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String
+  tags        String[] @default([])
 
-  coverImageUrl String?
-  published     Boolean @default(false)
-  publishedAt   DateTime?
+  coverImage  String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  readingTime Int @default(0)
+  views       Int @default(0)
+  likes       Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // 🔗 Автор статьи
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  // 🔗 Категория
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+
+  // 🔗 Комментарии
+  comments Comment[]
+}
+
+model User {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  firstName String
+  lastName  String?
+
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  // 🔗 Связи
+  articles Article[]
+  comments Comment[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  articles Article[]
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔗 Связь с автором комментария
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  // 🔗 Связь с статьёй
+  article   Article @relation(fields: [articleId], references: [id])
+  articleId String
 }
