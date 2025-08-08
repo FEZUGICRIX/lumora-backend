@@ -2,13 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArticleInput } from './dto/create-article.input';
 import { UpdateArticleInput } from './dto/update-article.input';
 import { PrismaService } from '@/modules/prisma/prisma.service';
+import { generateSlug } from '@/shared/utils';
 
 @Injectable()
 export class ArticleService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createArticleInput: CreateArticleInput) {
-    const { authorId, categoryId, ...articleData } = createArticleInput;
+    const { authorId, categoryId, title, ...articleData } = createArticleInput;
+    const slug = generateSlug(title);
 
     // Проверка на существование связей
     const [author, category] = await Promise.all([
@@ -26,6 +28,8 @@ export class ArticleService {
 
     return this.prisma.article.create({
       data: {
+        slug,
+        title,
         ...articleData,
         author: {
           connect: { id: authorId },

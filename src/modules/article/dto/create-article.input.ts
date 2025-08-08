@@ -14,10 +14,6 @@ export class CreateArticleInput {
   @IsString()
   title: string;
 
-  @Field()
-  @IsString()
-  slug: string;
-
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
