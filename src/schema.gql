@@ -30,6 +30,7 @@ type Comment {
 type Category {
   id: ID!
   name: String!
+  slug: String!
   articles: [Article!]!
 }
 
@@ -46,6 +47,7 @@ type Article {
   readingTime: Float!
   views: Float!
   likes: Float!
+  commentsCount: Int
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
@@ -55,13 +57,46 @@ type Article {
 }
 
 type Query {
-  getAllArticles: [Article!]!
+  getArticles(
+    """filter by category slug"""
+    categorySlugs: [String!]
+
+    """ISO date string, from (inclusive)"""
+    dateFrom: String
+
+    """ISO date string, to (inclusive)"""
+    dateTo: String
+    sortBy: ArticleSortBy = CREATED_AT
+    order: SortOrder = DESC
+
+    """limit"""
+    take: Int
+
+    """offset"""
+    skip: Int
+
+    """simple text search in title/description/content"""
+    search: String
+  ): [Article!]!
   getArticleBySlug(slug: String!): Article!
   getAllUsers: [User!]!
   getUserById(id: ID!): User
   comment(id: Int!): Comment!
   getCategories: [Category!]!
-  category(id: Int!): Category!
+  category(slug: String!): Category!
+}
+
+enum ArticleSortBy {
+  CREATED_AT
+  UPDATED_AT
+  LIKES
+  VIEWS
+  COMMENTS
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }
 
 type Mutation {
@@ -76,7 +111,7 @@ type Mutation {
   removeComment(id: Int!): Comment!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
-  removeCategory(id: Int!): Category!
+  removeCategory(id: ID!): Category!
 }
 
 input CreateArticleInput {

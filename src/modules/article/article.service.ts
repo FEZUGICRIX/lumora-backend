@@ -3,6 +3,11 @@ import { CreateArticleInput } from './dto/create-article.input';
 import { UpdateArticleInput } from './dto/update-article.input';
 import { PrismaService } from '@/modules/prisma/prisma.service';
 import { generateSlug } from '@/shared/utils';
+import {
+  ArticleSortBy,
+  GetArticlesArgs,
+  SortOrder,
+} from './dto/get-articles.args';
 
 @Injectable()
 export class ArticleService {
@@ -10,7 +15,7 @@ export class ArticleService {
 
   async create(createArticleInput: CreateArticleInput) {
     const { authorId, categoryId, title, ...articleData } = createArticleInput;
-    const slug = generateSlug(title);
+    const slug = generateSlug(title, true);
 
     // Проверка на существование связей
     const [author, category] = await Promise.all([
@@ -46,17 +51,90 @@ export class ArticleService {
     });
   }
 
-  findAll() {
-    return this.prisma.article.findMany({
+  async findAll(args?: GetArticlesArgs) {
+    const {
+      categorySlugs,
+      dateFrom,
+      dateTo,
+      sortBy = ArticleSortBy.CREATED_AT,
+      order = SortOrder.DESC,
+      take,
+      skip,
+      search,
+    } = args || {};
+
+    // --- Построение where для Prisma ---
+    const where: any = {};
+
+    if (categorySlugs?.length) {
+      where.category = { slug: { in: categorySlugs } };
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(dateFrom);
+      if (dateTo) where.createdAt.lte = new Date(dateTo);
+    }
+
+    // --- Построение orderBy ---
+    const orderDir: 'asc' | 'desc' = order === SortOrder.ASC ? 'asc' : 'desc';
+    const orderBy: any[] = [];
+
+    switch (sortBy) {
+      case ArticleSortBy.UPDATED_AT:
+        orderBy.push({ updatedAt: orderDir });
+        break;
+      case ArticleSortBy.CREATED_AT:
+        orderBy.push({ createdAt: orderDir });
+        break;
+      case ArticleSortBy.LIKES:
+        orderBy.push({ likes: orderDir });
+        break;
+      case ArticleSortBy.VIEWS:
+        orderBy.push({ views: orderDir });
+        break;
+      case ArticleSortBy.COMMENTS:
+        // сортировка по количеству комментариев (relation)
+        orderBy.push({ _count: { comments: orderDir } });
+        break;
+      default:
+        orderBy.push({ createdAt: orderDir });
+    }
+
+    // --- Выполняем запрос к Prisma ---
+    const articles = await this.prisma.article.findMany({
+      where,
+      orderBy,
+      take,
+      skip,
       include: {
         author: true,
         category: true,
         comments: {
-          include: {
-            author: true,
-          },
+          include: { author: true },
+        },
+        _count: {
+          select: { comments: true },
         },
       },
+    });
+
+    // Мапим результат, чтобы в GraphQL отдавать удобное поле commentsCount
+    return articles.map((a) => {
+      const commentsCount =
+        (a as any)._count?.comments ?? a.comments?.length ?? 0;
+      return {
+        ...a,
+        commentsCount,
+      };
     });
   }
 
@@ -66,11 +144,8 @@ export class ArticleService {
       include: {
         author: true,
         category: true,
-        comments: {
-          include: {
-            author: true,
-          },
-        },
+        comments: { include: { author: true } },
+        _count: { select: { comments: true } },
       },
     });
 
@@ -78,7 +153,11 @@ export class ArticleService {
       throw new NotFoundException(`Article with id ${slug} not found`);
     }
 
-    return article;
+    return {
+      ...article,
+      commentsCount:
+        (article as any)._count?.comments ?? article.comments?.length ?? 0,
+    };
   }
 
   async update(slug: string, updateArticleInput: UpdateArticleInput) {

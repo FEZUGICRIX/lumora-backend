@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from '@/modules/user/entities/user.entity';
 import { Comment } from '@/modules/comment/entities/comment.entity';
 import { Category } from '@/modules/category/entities/category.entity';
@@ -41,6 +41,9 @@ export class Article {
   @Field()
   likes: number;
 
+  @Field(() => Int, { nullable: true })
+  commentsCount?: number;
+
   @Field()
   createdAt: Date;
 
@@ -54,7 +57,7 @@ export class Article {
   @Field(() => User)
   author: User;
 
-  // // 🔗 Категория
+  // 🔗 Категория
   @Field(() => Category)
   category: Category;
 
