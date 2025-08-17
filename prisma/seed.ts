@@ -1,18 +1,21 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { generateSlug } from '@/shared/utils';
 
 const prisma = new PrismaClient();
 
 async function main() {
   // 🔸 Создаём 5 категорий
   const categories = await Promise.all(
-    Array.from({ length: 5 }).map(() =>
-      prisma.category.create({
+    Array.from({ length: 5 }).map(() => {
+      const name = faker.commerce.department();
+      return prisma.category.create({
         data: {
-          name: faker.commerce.department(),
+          name,
+          slug: generateSlug(name),
         },
-      }),
-    ),
+      });
+    }),
   );
 
   // 🔸 Создаём 10 юзеров

@@ -3,7 +3,7 @@ import slugify from 'slugify';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
 
-export function generateSlug(title: string): string {
+export function generateSlug(title: string, withId = false): string {
   const slug = slugify(title, { lower: true, strict: true });
-  return `${slug}-${nanoid()}`;
+  return withId ? `${slug}-${nanoid()}` : slug;
 }

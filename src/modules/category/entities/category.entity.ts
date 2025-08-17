@@ -9,6 +9,9 @@ export class Category {
   @Field()
   name: string;
 
+  @Field()
+  slug: string;
+
   @Field(() => [Article])
   articles: Article[];
 }

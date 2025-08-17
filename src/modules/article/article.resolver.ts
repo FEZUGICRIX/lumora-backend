@@ -3,6 +3,7 @@ import { ArticleService } from './article.service';
 import { Article } from './entities/article.entity';
 import { CreateArticleInput } from './dto/create-article.input';
 import { UpdateArticleInput } from './dto/update-article.input';
+import { GetArticlesArgs } from './dto/get-articles.args';
 
 @Resolver(() => Article)
 export class ArticleResolver {
@@ -16,9 +17,9 @@ export class ArticleResolver {
     return this.articleService.create(createArticleInput);
   }
 
-  @Query(() => [Article], { name: 'getAllArticles' })
-  findAll() {
-    return this.articleService.findAll();
+  @Query(() => [Article], { name: 'getArticles' })
+  findFiltered(@Args() args: GetArticlesArgs) {
+    return this.articleService.findAll(args);
   }
 
   @Query(() => Article, { name: 'getArticleBySlug' })
