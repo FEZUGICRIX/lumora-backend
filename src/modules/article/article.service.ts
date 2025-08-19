@@ -103,7 +103,7 @@ export class ArticleService {
         break;
       case ArticleSortBy.COMMENTS:
         // сортировка по количеству комментариев (relation)
-        orderBy.push({ _count: { comments: orderDir } });
+        orderBy.push({ comments: { _count: orderDir } });
         break;
       default:
         orderBy.push({ createdAt: orderDir });
