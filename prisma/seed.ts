@@ -1,14 +1,70 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { generateSlug } from '@/shared/utils';
 
 const prisma = new PrismaClient();
 
+// Функция для генерации slug
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Уникальные названия категорий чтобы избежать дубликатов
+const UNIQUE_CATEGORIES = [
+  'Technology',
+  'Programming',
+  'Design',
+  'Business',
+  'Lifestyle',
+  'Science',
+  'Health',
+  'Education',
+  'Entertainment',
+  'Sports',
+];
+
+// Генерация JSON контента для TipTap
+function generateTiptapJsonContent(): any {
+  const paragraphs = faker.number.int({ min: 3, max: 8 });
+
+  return {
+    type: 'doc',
+    content: Array.from({ length: paragraphs }).map(() => ({
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: faker.lorem.paragraph(),
+        },
+      ],
+    })),
+  };
+}
+
+// Генерация HTML контента
+function generateHtmlContent(): string {
+  const paragraphs = faker.number.int({ min: 3, max: 8 });
+
+  return Array.from({ length: paragraphs })
+    .map(() => `<p>${faker.lorem.paragraph()}</p>`)
+    .join('');
+}
+
 async function main() {
-  // 🔸 Создаём 5 категорий
+  console.log('🌱 Starting seed...');
+
+  // 🔸 Очищаем базу данных (осторожно!)
+  await prisma.comment.deleteMany();
+  await prisma.article.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
+  // 🔸 Создаём категории из уникального списка
   const categories = await Promise.all(
-    Array.from({ length: 5 }).map(() => {
-      const name = faker.commerce.department();
+    UNIQUE_CATEGORIES.slice(0, 5).map((name) => {
       return prisma.category.create({
         data: {
           name,
@@ -18,19 +74,23 @@ async function main() {
     }),
   );
 
+  console.log(`✅ Created ${categories.length} categories`);
+
   // 🔸 Создаём 10 юзеров
   const users = await Promise.all(
     Array.from({ length: 10 }).map(() =>
       prisma.user.create({
         data: {
           email: faker.internet.email(),
-          firstName: faker.name.firstName(),
-          lastName: faker.name.lastName(),
+          firstName: faker.person.firstName(),
+          lastName: faker.person.lastName(),
           avatar: faker.image.avatar(),
         },
       }),
     ),
   );
+
+  console.log(`✅ Created ${users.length} users`);
 
   // 🔸 Создаём 20 статей
   const articles = await Promise.all(
@@ -39,21 +99,44 @@ async function main() {
       const category = faker.helpers.arrayElement(categories);
 
       const title = faker.lorem.sentence();
-      const slug = faker.helpers.slugify(title.toLowerCase());
+      const slug = generateSlug(title);
+
+      const contentJson = generateTiptapJsonContent();
+      const contentHtml = generateHtmlContent();
+      const contentText = JSON.stringify(contentJson)
+        .replace(/[{}"\[\]]/g, '')
+        .substring(0, 500);
+
+      const wordCount = contentText.split(/\s+/).length;
+      const readingTime = Math.ceil(wordCount / 200); // ~200 слов в минуту
 
       return prisma.article.create({
         data: {
           title,
           slug,
           description: faker.lorem.paragraph(),
-          content: faker.lorem.paragraphs(5),
-          tags: faker.helpers.arrayElements(['tech', 'life', 'dev', 'news'], 2),
-          coverImage: faker.image.urlPicsumPhotos(),
-          published: faker.datatype.boolean(),
-          publishedAt: faker.date.recent(),
-          readingTime: faker.number.int({ min: 1, max: 10 }),
+          contentJson,
+          contentHtml,
+          contentText: contentText.substring(0, 1000), // Обрезаем до 1000 символов
+          tags: faker.helpers.arrayElements(
+            [
+              'tech',
+              'life',
+              'dev',
+              'news',
+              'programming',
+              'design',
+              'business',
+            ],
+            3,
+          ),
+          coverImage: faker.image.urlLoremFlickr({ width: 800, height: 400 }),
+          published: faker.datatype.boolean({ probability: 0.8 }), // 80% статей опубликованы
+          publishedAt: faker.date.recent({ days: 30 }),
+          readingTime,
+          wordCount,
           views: faker.number.int({ min: 1000, max: 30000 }),
-          likes: faker.number.int({ min: 1000, max: 100000 }),
+          likes: faker.number.int({ min: 100, max: 5000 }),
           authorId: author.id,
           categoryId: category.id,
         },
@@ -61,15 +144,17 @@ async function main() {
     }),
   );
 
+  console.log(`✅ Created ${articles.length} articles`);
+
   // 🔸 Создаём комментарии
-  await Promise.all(
+  const comments = await Promise.all(
     Array.from({ length: 100 }).map(() => {
       const author = faker.helpers.arrayElement(users);
       const article = faker.helpers.arrayElement(articles);
 
       return prisma.comment.create({
         data: {
-          content: faker.lorem.sentences(2),
+          content: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
           authorId: author.id,
           articleId: article.id,
         },
@@ -77,12 +162,22 @@ async function main() {
     }),
   );
 
-  console.log('🌱 Seed completed!');
+  console.log(`✅ Created ${comments.length} comments`);
+
+  console.log('🌱 Seed completed successfully!');
+  console.log('📊 Statistics:');
+  console.log(`   - Categories: ${categories.length}`);
+  console.log(`   - Users: ${users.length}`);
+  console.log(`   - Articles: ${articles.length}`);
+  console.log(`   - Comments: ${comments.length}`);
 }
 
 main()
   .catch((e) => {
+    console.error('❌ Seed failed:');
     console.error(e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

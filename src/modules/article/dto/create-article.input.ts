@@ -1,4 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-scalars';
 import {
   IsBoolean,
   IsDate,
@@ -6,6 +7,7 @@ import {
   IsString,
   IsArray,
   IsInt,
+  IsObject,
 } from 'class-validator';
 
 @InputType()
@@ -19,9 +21,9 @@ export class CreateArticleInput {
   @IsString()
   description: string;
 
-  @Field()
-  @IsString()
-  content: string;
+  @Field(() => GraphQLJSON)
+  @IsObject()
+  content: any;
 
   @Field(() => [String], { defaultValue: [] })
   @IsArray()

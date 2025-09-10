@@ -2,6 +2,7 @@ import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from '@/modules/user/entities/user.entity';
 import { Comment } from '@/modules/comment/entities/comment.entity';
 import { Category } from '@/modules/category/entities/category.entity';
+import { GraphQLJSON } from 'graphql-scalars';
 
 @ObjectType()
 export class Article {
@@ -17,8 +18,14 @@ export class Article {
   @Field()
   description: string;
 
-  @Field()
-  content: string;
+  @Field(() => GraphQLJSON)
+  contentJson: any;
+
+  @Field(() => String)
+  contentHtml: string;
+
+  @Field(() => String)
+  contentText: string;
 
   @Field(() => [String])
   tags: string[];

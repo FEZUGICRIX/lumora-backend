@@ -24,7 +24,7 @@ export class ArticleResolver {
 
   @Query(() => Article, { name: 'getArticleBySlug' })
   findOne(@Args('slug', { type: () => String }) slug: string) {
-    return this.articleService.findOne(slug);
+    return this.articleService.findBySlug(slug);
   }
 
   @Mutation(() => Article)
