@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArticleInput } from './dto/create-article.input';
 import { UpdateArticleInput } from './dto/update-article.input';
-import { PrismaService } from '@/modules/prisma/prisma.service';
 import { generateSlug } from '@/shared/utils';
 import {
   ArticleSortBy,
   GetArticlesArgs,
   SortOrder,
 } from './dto/get-articles.args';
+import { PrismaService } from '@/modules/prisma/prisma.service';
+import { UploadService } from '@/modules/upload/upload.service';
 import { ContentProcessorService } from './services/content-processor.service';
 
 @Injectable()
@@ -15,11 +16,29 @@ export class ArticleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly contentProcessor: ContentProcessorService,
+    private readonly uploadService: UploadService,
   ) {}
 
   async create(input: CreateArticleInput) {
     const { authorId, categoryId, title, content, ...articleData } = input;
     const slug = generateSlug(title, true);
+
+    // TODO: НЕ ИСПОЛЬЗОВАТЬ ТАКОЙ МЕТОД ПРОВЕРКИ
+    // const existingArticle = await this.findBySlug(slug);
+
+
+    // TODO: Обработка и загрузка обложки, если есть
+    if (input.coverImage) {
+      // const fileUrl = await this.uploadService.saveFile(input.coverImage);
+      // articleData.coverImage = fileUrl;
+
+      // if (existingArticle.coverImage) {
+      //   await this.uploadService.deleteFile(existingArticle.coverImage);
+      // }
+
+      // // TODO: Удаление старой обложки, если нужно
+      // articleData.coverImage = input.coverImage;
+    }
 
     // Обработка контента - преобразуем JSON в три формата
     const processedContent =
@@ -66,7 +85,7 @@ export class ArticleService {
 
     const data: any = {
       ...(input.title && { title: input.title }),
-      ...(input.coverImage && {coverImage: input.coverImage}),
+      ...(input.coverImage && { coverImage: input.coverImage }),
       // ...(newSlug && { slug: newSlug }),
       ...(input.description !== undefined && {
         description: input.description,
