@@ -1,47 +1,38 @@
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { ApolloDriverConfig } from '@nestjs/apollo';
 
-import { AppController } from '@/app.controller';
-import { AppService } from '@/app.service';
+// Configuration
+import { appConfig, graphqlConfig } from '@/common/config';
 
-import { PrismaModule } from '@/modules/prisma/prisma.module';
-import { ArticleModule } from '@/modules/article/article.module';
-import { UserModule } from '@/modules/user/user.module';
-import { CommentModule } from '@/modules/comment/comment.module';
-import { CategoryModule } from '@/modules/category/category.module';
-import { UploadModule } from '@/modules/upload/upload.module';
-
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
+// Application Modules
+import {
+  PrismaModule,
+  HealthModule,
+  AuthModule,
+  UserModule,
+  ArticleModule,
+  CategoryModule,
+  CommentModule,
+  UploadModule,
+} from '@/modules';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      resolvers: { Upload: GraphQLUpload },
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'public'),
-      serveRoot: '/static',
-    }),
+    // Framework Modules
+    ConfigModule.forRoot(appConfig),
+    GraphQLModule.forRoot<ApolloDriverConfig>(graphqlConfig),
+
+    // Application Modules
     PrismaModule,
-    ArticleModule,
+    HealthModule,
+    AuthModule,
     UserModule,
-    CommentModule,
+    ArticleModule,
     CategoryModule,
+    CommentModule,
     UploadModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

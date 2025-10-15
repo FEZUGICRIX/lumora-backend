@@ -4,5 +4,6 @@ import { UploadResolver } from './upload.resolver';
 
 @Module({
   providers: [UploadService, UploadResolver],
+  exports: [UploadService],
 })
 export class UploadModule {}

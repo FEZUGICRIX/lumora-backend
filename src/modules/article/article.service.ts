@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArticleInput } from './dto/create-article.input';
 import { UpdateArticleInput } from './dto/update-article.input';
-import { generateSlug } from '@/shared/utils';
+import { generateSlug } from '@/common/utils';
 import {
   ArticleSortBy,
   GetArticlesArgs,
@@ -26,16 +26,13 @@ export class ArticleService {
     // TODO: НЕ ИСПОЛЬЗОВАТЬ ТАКОЙ МЕТОД ПРОВЕРКИ
     // const existingArticle = await this.findBySlug(slug);
 
-
     // TODO: Обработка и загрузка обложки, если есть
     if (input.coverImage) {
       // const fileUrl = await this.uploadService.saveFile(input.coverImage);
       // articleData.coverImage = fileUrl;
-
       // if (existingArticle.coverImage) {
       //   await this.uploadService.deleteFile(existingArticle.coverImage);
       // }
-
       // // TODO: Удаление старой обложки, если нужно
       // articleData.coverImage = input.coverImage;
     }

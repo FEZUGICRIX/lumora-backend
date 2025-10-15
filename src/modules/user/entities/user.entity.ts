@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { AuthMethod, UserRole } from '@prisma/client';
 
 @ObjectType()
 export class User {
@@ -6,16 +7,28 @@ export class User {
   id: string;
 
   @Field()
+  username: string;
+
+  @Field()
   email: string;
 
   @Field()
   firstName: string;
 
-  @Field()
+  @Field({ nullable: true })
   lastName?: string;
 
-  @Field()
+  @Field({ nullable: true })
   avatar?: string;
+
+  @Field(() => UserRole)
+  role: UserRole;
+
+  @Field(() => AuthMethod)
+  method: AuthMethod;
+
+  @Field()
+  emailVerified: boolean;
 
   @Field()
   createdAt: Date;
