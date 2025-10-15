@@ -1,0 +1,8 @@
+export { PrismaModule } from './prisma/prisma.module';
+export { AuthModule } from './auth/auth.module';
+export { UserModule } from './user/user.module';
+export { ArticleModule } from './article/article.module';
+export { CategoryModule } from './category/category.module';
+export { CommentModule } from './comment/comment.module';
+export { UploadModule } from './upload/upload.module';
+export { HealthModule } from './health/health.module';

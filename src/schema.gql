@@ -4,11 +4,28 @@
 
 type User {
   id: ID!
+  username: String!
   email: String!
   firstName: String!
-  lastName: String!
-  avatar: String!
+  lastName: String
+  avatar: String
+  role: UserRole!
+  method: AuthMethod!
+  emailVerified: Boolean!
   createdAt: DateTime!
+}
+
+"""Defines roles available in the system"""
+enum UserRole {
+  USER
+  ADMIN
+}
+
+"""Supported authentication methods"""
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+  GITHUB
 }
 
 """
@@ -69,6 +86,8 @@ type UploadResponse {
 }
 
 type Query {
+  getAllUsers: [User!]!
+  getUserByUserName(username: String!): User
   getArticles(
     """filter by category slug"""
     categorySlugs: [String!]
@@ -91,11 +110,9 @@ type Query {
     search: String
   ): [Article!]!
   getArticleBySlug(slug: String!): Article!
-  getAllUsers: [User!]!
-  getUserById(id: ID!): User
-  comment(id: Int!): Comment!
   getCategories: [Category!]!
   category(slug: String!): Category!
+  comment(id: Int!): Comment!
 }
 
 enum ArticleSortBy {
@@ -112,20 +129,56 @@ enum SortOrder {
 }
 
 type Mutation {
+  register(registerInput: RegisterInput!): User!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: ID!): User!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   removeArticle(slug: String!): Article!
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  removeUser(id: Int!): User!
-  createComment(createCommentInput: CreateCommentInput!): Comment!
-  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
-  removeComment(id: Int!): Comment!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   removeCategory(id: ID!): Category!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
+  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
+  removeComment(id: Int!): Comment!
   uploadFile(file: Upload!): UploadResponse!
   deleteFile: UploadResponse!
+}
+
+input RegisterInput {
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  passwordRepeat: String!
+  avatar: String
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  method: AuthMethod!
+  password: String!
+  firstName: String!
+  lastName: String
+  avatar: String
+  role: UserRole! = USER
+  emailVerified: Boolean! = false
+}
+
+input UpdateUserInput {
+  username: String
+  email: String
+  method: AuthMethod
+  password: String
+  firstName: String
+  lastName: String
+  avatar: String
+  role: UserRole = USER
+  emailVerified: Boolean = false
+  id: ID!
 }
 
 input CreateArticleInput {
@@ -159,18 +212,12 @@ input UpdateArticleInput {
   slug: String!
 }
 
-input CreateUserInput {
-  email: String!
-  firstName: String!
-  lastName: String!
-  avatar: String!
+input CreateCategoryInput {
+  name: String!
 }
 
-input UpdateUserInput {
-  email: String
-  firstName: String
-  lastName: String
-  avatar: String
+input UpdateCategoryInput {
+  name: String
   id: ID!
 }
 
@@ -184,15 +231,6 @@ input UpdateCommentInput {
   content: String
   authorId: String
   articleId: String
-  id: ID!
-}
-
-input CreateCategoryInput {
-  name: String!
-}
-
-input UpdateCategoryInput {
-  name: String
   id: ID!
 }
 
