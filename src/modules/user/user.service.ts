@@ -56,22 +56,16 @@ export class UserService {
   }
 
   // Check username available
-  // TODO: оптимизировать метод
-  async checkUser({ username, email }) {
-    const checkEmail = await this.prisma.user.findUnique({
-      where: { email },
+  async checkUser(username: string, email: string) {
+    const existingUser = await this.prisma.user.findFirst({
+      where: { OR: [{ email }, { username }] },
     });
 
-    if (checkEmail) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    const checkUsername = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (checkUsername) {
-      throw new ConflictException('User with this username already exists');
+    if (existingUser) {
+      if (existingUser.email === email)
+        throw new ConflictException('User with this email already exists');
+      if (existingUser.username === username)
+        throw new ConflictException('User with this username already exists');
     }
   }
 
