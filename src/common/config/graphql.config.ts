@@ -11,6 +11,7 @@ export const graphqlConfig: ApolloDriverConfig = {
   playground: false,
   plugins: [ApolloServerPluginLandingPageLocalDefault()],
   resolvers: { Upload: GraphQLUpload },
+  introspection: true,
   formatError: (err: GraphQLFormattedError) => {
     const originalError = (err.extensions as any)?.exception;
 

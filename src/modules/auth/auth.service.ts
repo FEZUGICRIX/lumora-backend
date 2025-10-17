@@ -1,3 +1,4 @@
+// TODO: убрать комментарий ниже
 // бизнес-логика: register / login / refresh / logout / revoke / resetPassword / verifyEmail.
 
 import {
@@ -13,7 +14,8 @@ import { v4 as uuid } from 'uuid';
 import { RegisterInput } from './dto/register.input';
 import { AuthMethod, UserRole } from '@prisma/client';
 import type { Request } from 'express';
-import { User } from '../user/entities/user.entity';
+import { User } from '@prisma/client';
+import { Session } from 'express-session';
 
 @Injectable()
 export class AuthService {
@@ -24,19 +26,14 @@ export class AuthService {
     // private jwt: JwtService,
   ) {}
 
-  // TODO: с помощью AI отредактировать код
-  async register(dto: RegisterInput, req: Request) {
-    // Check user's unique data
-    await this.usersService.checkUser({
-      username: dto.username,
-      email: dto.email,
-    });
+  async register(dto: RegisterInput, req: Request): Promise<User> {
+    await this.usersService.checkUser(dto.username, dto.email);
 
     if (dto.password !== dto.passwordRepeat) {
       throw new ConflictException('Passwords do not match');
     }
 
-    const newUser = await this.usersService.createUser({
+    const newUser: User = await this.usersService.createUser({
       username: dto.username,
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -47,29 +44,36 @@ export class AuthService {
       role: UserRole.USER,
     });
 
-    if (!newUser) {
-      throw new Error('User creation failed');
-    }
+    // Create session
+    await this.saveSession(req, newUser);
+
     return newUser;
-    // return this.saveSession(req, newUser);
   }
 
   async login() {}
 
   async logout() {}
 
-  private async saveSession(req: Request, user: User) {
-    return new Promise<{ user: User }>((resolve, reject) => {
+  private async saveSession(
+    req: Request & { session: Session & { userId?: string; role?: string } },
+    user: User,
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       try {
         req.session.userId = user.id;
         req.session.role = user.role;
 
         req.session.save((err) => {
-          if (err) return reject(err); // ❌ нельзя просто new InternalServerErrorException, надо reject
-          resolve({ user });
+          if (err) {
+            console.error('Failed to save session for user', user.id, err);
+            return reject(
+              new InternalServerErrorException('Session save failed'),
+            );
+          }
+          resolve();
         });
-      } catch (err) {
-        reject(err);
+      } catch (e) {
+        reject(e);
       }
     });
   }

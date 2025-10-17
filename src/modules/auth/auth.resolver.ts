@@ -16,9 +16,17 @@ export class AuthResolver {
     return this.authService.register(dto, req);
   }
 
-  // @HttpCode(HttpStatus.OK)
-  // @Post('login')
-  // signIn(@Body() signInDto: Record<string, any>) {
-  //   return this.authService.signIn(signInDto.username, signInDto.password);
+  // @Mutation(() => User)
+  // async login(
+  //   @Args('email') email: string,
+  //   @Args('password') password: string,
+  //   @Context() context: { req: Request },
+  // ) {
+  //   return this.authService.login(email, password, context.req);
+  // }
+
+  // @Mutation(() => Boolean)
+  // async logout(@Context() context: { req: Request }) {
+  //   return this.authService.logout(context.req);
   // }
 }
