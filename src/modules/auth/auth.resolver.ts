@@ -2,7 +2,8 @@ import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 import { User } from '../user/entities/user.entity';
 import { RegisterInput } from './dto/register.input';
-import type { Request } from 'express';
+import { LoginInput } from './dto/login.input';
+import type { Request, Response } from 'express';
 
 @Resolver()
 export class AuthResolver {
@@ -16,17 +17,16 @@ export class AuthResolver {
     return this.authService.register(dto, req);
   }
 
-  // @Mutation(() => User)
-  // async login(
-  //   @Args('email') email: string,
-  //   @Args('password') password: string,
-  //   @Context() context: { req: Request },
-  // ) {
-  //   return this.authService.login(email, password, context.req);
-  // }
+  @Mutation(() => User)
+  login(
+    @Args('loginInput') dto: LoginInput,
+    @Context() context: { req: Request },
+  ) {
+    return this.authService.login(dto, context.req);
+  }
 
-  // @Mutation(() => Boolean)
-  // async logout(@Context() context: { req: Request }) {
-  //   return this.authService.logout(context.req);
-  // }
+  @Mutation(() => Boolean)
+  logout(@Context() context: { req: Request; res: Response }) {
+    return this.authService.logout(context.req, context.res);
+  }
 }

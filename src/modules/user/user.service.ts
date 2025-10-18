@@ -51,10 +51,6 @@ export class UserService {
     return user;
   }
 
-  async saveSession(user: User) {
-    console.log(user);
-  }
-
   // Check username available
   async checkUser(username: string, email: string) {
     const existingUser = await this.prisma.user.findFirst({

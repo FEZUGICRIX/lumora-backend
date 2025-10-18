@@ -23,7 +23,6 @@ export class GraphQLValidationFilter implements ExceptionFilter {
       },
     };
 
-    console.log('Final GraphQL error:', graphqlError);
     return graphqlError;
   }
 }
