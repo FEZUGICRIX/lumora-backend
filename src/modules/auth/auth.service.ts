@@ -1,10 +1,9 @@
-// TODO: убрать комментарий ниже
-// бизнес-логика: register / login / refresh / logout / revoke / resetPassword / verifyEmail.
-
 import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '@/modules/user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,16 +12,19 @@ import { JwtService } from './services/jwt.service';
 import { v4 as uuid } from 'uuid';
 import { RegisterInput } from './dto/register.input';
 import { AuthMethod, UserRole } from '@prisma/client';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { User } from '@prisma/client';
 import { Session } from 'express-session';
+import { LoginInput } from './dto/login.input';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private usersService: UserService,
-    private hash: HashService,
+    private readonly usersService: UserService,
+    private readonly hash: HashService,
+    private readonly configService: ConfigService,
     // private jwt: JwtService,
   ) {}
 
@@ -50,9 +52,40 @@ export class AuthService {
     return newUser;
   }
 
-  async login() {}
+  async login(dto: LoginInput, req: Request): Promise<User> {
+    const user = await this.usersService.findUserByEmail(dto.email);
 
-  async logout() {}
+    if (!user || !dto.password) {
+      throw new NotFoundException('User not found. Please check your data.');
+    }
+
+    const isPasswordValid = await this.hash.verifyPassword(
+      user.passwordHash,
+      dto.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(
+        'Invalid password. Please try again or reset password if you forgot it.',
+      );
+    }
+
+    await this.saveSession(req, user);
+    return user;
+  }
+
+  async logout(req: Request, res: Response): Promise<boolean> {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        req.session.destroy((error) => (error ? reject(error) : resolve()));
+      });
+
+      res.clearCookie(this.configService.get<string>('SESSION_NAME')!);
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException('Logout failed');
+    }
+  }
 
   private async saveSession(
     req: Request & { session: Session & { userId?: string; role?: string } },

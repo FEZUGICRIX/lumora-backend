@@ -130,6 +130,8 @@ enum SortOrder {
 
 type Mutation {
   register(registerInput: RegisterInput!): User!
+  login(loginInput: LoginInput!): User!
+  logout: Boolean!
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: ID!): User!
@@ -154,6 +156,11 @@ input RegisterInput {
   password: String!
   passwordRepeat: String!
   avatar: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
 }
 
 input CreateUserInput {
