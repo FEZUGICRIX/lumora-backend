@@ -37,6 +37,7 @@
     "@nestjs/platform-express": "^9.4.3",
     "@nestjs/serve-static": "^5.0.3",
     "@nestjs/terminus": "^11.0.0",
+    "@nestlab/google-recaptcha": "^3.10.0",
     "@prisma/client": "^6.13.0",
     "@tiptap/extension-highlight": "^3.4.1",
     "@tiptap/extension-image": "^3.4.1",
