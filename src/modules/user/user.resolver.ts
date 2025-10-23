@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
+import { Authorization } from '../auth/decorators/auth.decorator';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -18,6 +19,7 @@ export class UserResolver {
     return this.userService.getAllUsers();
   }
 
+  @Authorization()
   @Query(() => User, { name: 'getUserByUserName', nullable: true })
   getUser(@Args('username', { type: () => String }) username: string) {
     return this.userService.getUser(username);
