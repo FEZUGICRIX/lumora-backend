@@ -8,8 +8,6 @@ import {
 import { UserService } from '@/modules/user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { HashService } from './services/hash.service';
-import { JwtService } from './services/jwt.service';
-import { v4 as uuid } from 'uuid';
 import { RegisterInput } from './dto/register.input';
 import { AuthMethod, UserRole } from '@prisma/client';
 import type { Request, Response } from 'express';
