@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { Authorization } from '../auth/decorators/auth.decorator';
+import { Recaptcha } from '@nestlab/google-recaptcha';
 
 @Resolver(() => User)
 export class UserResolver {

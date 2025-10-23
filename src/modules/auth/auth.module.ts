@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserModule } from '@/modules/user/user.module';
 import { UserService } from '../user/user.service';
 import { AuthResolver } from '@/modules/auth/auth.resolver';
 import { HashService } from './services/hash.service';
+import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
+import { googleRecaptchaConfig } from '@/common/config';
 
 @Module({
-  imports: [UserModule],
+  imports: [GoogleRecaptchaModule.forRootAsync(googleRecaptchaConfig)],
   providers: [AuthService, AuthResolver, UserService, HashService],
   exports: [AuthService],
-  
 })
 export class AuthModule {}
