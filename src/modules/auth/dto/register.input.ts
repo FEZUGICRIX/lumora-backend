@@ -23,8 +23,7 @@ export class RegisterInput {
 
   @Field(() => String)
   @IsString({ message: 'Last name must be a string' })
-  @IsNotEmpty({ message: 'Last name is required' })
-  lastName: string;
+  lastName?: string;
 
   @Field(() => String)
   @IsEmail({}, { message: 'Invalid email format' })

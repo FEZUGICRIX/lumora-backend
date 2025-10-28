@@ -1,8 +1,8 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-scalars';
 import { User } from '@/modules/user/entities/user.entity';
 import { Comment } from '@/modules/comment/entities/comment.entity';
 import { Category } from '@/modules/category/entities/category.entity';
-import { GraphQLJSON } from 'graphql-scalars';
 
 @ObjectType()
 export class Article {

@@ -33,6 +33,10 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type AuthUrlResponse {
+  url: String!
+}
+
 type Comment {
   id: ID!
   content: String!
@@ -86,8 +90,7 @@ type UploadResponse {
 }
 
 type Query {
-  getAllUsers: [User!]!
-  getUserByUserName(username: String!): User
+  connect(provider: String!): AuthUrlResponse!
   getArticles(
     """filter by category slug"""
     categorySlugs: [String!]
@@ -132,9 +135,6 @@ type Mutation {
   register(registerInput: RegisterInput!): User!
   login(loginInput: LoginInput!): User!
   logout: Boolean!
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  removeUser(id: ID!): User!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   removeArticle(slug: String!): Article!
@@ -161,31 +161,6 @@ input RegisterInput {
 input LoginInput {
   email: String!
   password: String!
-}
-
-input CreateUserInput {
-  username: String!
-  email: String!
-  method: AuthMethod!
-  password: String!
-  firstName: String!
-  lastName: String
-  avatar: String
-  role: UserRole! = USER
-  emailVerified: Boolean! = false
-}
-
-input UpdateUserInput {
-  username: String
-  email: String
-  method: AuthMethod
-  password: String
-  firstName: String
-  lastName: String
-  avatar: String
-  role: UserRole = USER
-  emailVerified: Boolean = false
-  id: ID!
 }
 
 input CreateArticleInput {

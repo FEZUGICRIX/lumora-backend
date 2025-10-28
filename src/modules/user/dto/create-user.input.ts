@@ -14,7 +14,7 @@ export class CreateUserInput {
   // 🧩 Основная информация
   @Field()
   @Matches(/^[a-zA-Z0-9_]{3,20}$/, { message: 'Invalid username' })
-  username: string;
+  username?: string;
 
   @Field()
   @IsEmail()
@@ -26,7 +26,7 @@ export class CreateUserInput {
 
   @Field()
   @MinLength(6)
-  password: string;
+  passwordHash: string;
 
   // 👤 Персональные данные
   @Field()
@@ -43,7 +43,7 @@ export class CreateUserInput {
   // ⚙️ Системные поля
   @Field(() => UserRole, { defaultValue: UserRole.USER })
   @IsEnum(UserRole)
-  role: UserRole;
+  role?: UserRole;
 
   @Field({ defaultValue: false })
   @IsBoolean()

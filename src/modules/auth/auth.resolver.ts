@@ -1,13 +1,24 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
-import { AuthService } from './auth.service';
+import { BadRequestException, UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import type { Request, Response } from 'express';
+
 import { User } from '../user/entities/user.entity';
+
+import { AuthService } from './auth.service';
+import { ProviderService } from './provider/provider.service';
+
 import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
-import type { Request, Response } from 'express';
+import { AuthUrlResponse } from './dto/responses/auth-url-response';
+
+import { AuthProviderGuard } from './guards/provider.guard';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly providerService: ProviderService,
+  ) {}
 
   @Mutation(() => User)
   register(
@@ -23,6 +34,20 @@ export class AuthResolver {
     @Context() context: { req: Request },
   ) {
     return this.authService.login(dto, context.req);
+  }
+
+  @UseGuards(AuthProviderGuard)
+  @Query(() => AuthUrlResponse)
+  async connect(@Args('provider') provider: string) {
+    const providerInstance = this.providerService.findByService(provider);
+
+    if (!providerInstance) {
+      throw new BadRequestException(`Provider '${provider}' is not supported`);
+    }
+
+    return {
+      url: providerInstance.getAuthUrl(),
+    };
   }
 
   @Mutation(() => Boolean)

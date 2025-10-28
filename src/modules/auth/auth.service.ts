@@ -1,29 +1,34 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { Request, Response } from 'express';
+import { Prisma, User, AuthMethod, UserRole } from '@prisma/client';
+import type { AuthenticatedRequest } from '@/common/types';
+
 import { UserService } from '@/modules/user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { HashService } from './services/hash.service';
+import { ProviderService } from './provider/provider.service';
+
 import { RegisterInput } from './dto/register.input';
-import { AuthMethod, UserRole } from '@prisma/client';
-import type { Request, Response } from 'express';
-import { User } from '@prisma/client';
-import { Session } from 'express-session';
 import { LoginInput } from './dto/login.input';
-import { ConfigService } from '@nestjs/config';
+import { BaseOAuthService } from './provider/services/base-oauth.service';
+import { TypeUserInfo } from './provider/services/types';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly providerService: ProviderService,
     private readonly usersService: UserService,
     private readonly hash: HashService,
     private readonly configService: ConfigService,
-    // private jwt: JwtService,
   ) {}
 
   async register(dto: RegisterInput, req: Request): Promise<User> {
@@ -37,7 +42,7 @@ export class AuthService {
       username: dto.username,
       firstName: dto.firstName,
       lastName: dto.lastName,
-      password: dto.password,
+      passwordHash: await this.hash.hashPassword(dto.password),
       email: dto.email,
       emailVerified: false,
       method: AuthMethod.CREDENTIALS,
@@ -51,25 +56,34 @@ export class AuthService {
   }
 
   async login(dto: LoginInput, req: Request): Promise<User> {
-    const user = await this.usersService.findUserByEmail(dto.email);
+    const user = await this.validateUser(dto.email, dto.password);
 
-    if (!user || !dto.password) {
-      throw new NotFoundException('User not found. Please check your data.');
-    }
-
-    const isPasswordValid = await this.hash.verifyPassword(
-      user.passwordHash,
-      dto.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException(
-        'Invalid password. Please try again or reset password if you forgot it.',
-      );
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     await this.saveSession(req, user);
     return user;
+  }
+
+  async extractProfileFromCode(
+    req: Request,
+    provider: string,
+    code: string,
+  ): Promise<User> {
+    const providerInstance = this.getProviderInstance(provider);
+    const profile = await this.getUserProfile(providerInstance, code);
+
+    return await this.prisma.$transaction(async (tx) => {
+      const existingUser = await this.findExistingUser(tx, profile);
+
+      if (existingUser) {
+        await this.saveSession(req, existingUser);
+        return existingUser;
+      }
+
+      return await this.createNewUserWithAccount(tx, req, profile);
+    });
   }
 
   async logout(req: Request, res: Response): Promise<boolean> {
@@ -85,8 +99,113 @@ export class AuthService {
     }
   }
 
+  private getProviderInstance(provider: string) {
+    const providerInstance = this.providerService.findByService(provider);
+    if (!providerInstance) {
+      throw new NotFoundException(`Provider ${provider} not found`);
+    }
+    return providerInstance;
+  }
+
+  private async getUserProfile(
+    providerInstance: BaseOAuthService,
+    code: string,
+  ): Promise<TypeUserInfo> {
+    const profile = await providerInstance.findUserByCode(code);
+    if (!profile) {
+      throw new BadRequestException('Failed to extract profile from code');
+    }
+    return profile;
+  }
+
+  private async createNewUserWithAccount(
+    tx: Prisma.TransactionClient,
+    req: Request,
+    profile: TypeUserInfo,
+  ) {
+    const authMethod = this.validateAuthMethod(profile.provider);
+
+    const user = await this.usersService.createUser({
+      email: profile.email,
+      method: authMethod,
+      firstName: profile.name,
+      passwordHash: '', // ← в createUser превратится в null
+      avatar: profile.picture,
+      emailVerified: true,
+    });
+
+    await this.createAccount(tx, user.id, profile);
+    await this.saveSession(req, user);
+
+    return user;
+  }
+
+  private async validateUser(
+    email: string,
+    password: string,
+  ): Promise<User | null> {
+    const user = await this.usersService.findUserForAuth(email);
+
+    if (!user) return null;
+
+    // ✅ Защита от OAuth логина по паролю
+    if (user.method !== AuthMethod.CREDENTIALS) return null;
+
+    if (!password || !user.passwordHash) return null;
+
+    const isPasswordValid = await this.hash.verifyPassword(
+      user.passwordHash,
+      password,
+    );
+
+    return isPasswordValid ? user : null;
+  }
+
+  private validateAuthMethod(provider: string): AuthMethod {
+    const authMethod = AuthMethod[provider.toUpperCase()];
+    if (!authMethod) {
+      throw new BadRequestException(`Unsupported provider: ${provider}`);
+    }
+    return authMethod;
+  }
+
+  private async createAccount(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    profile: TypeUserInfo,
+  ) {
+    await tx.account.create({
+      data: {
+        userId,
+        type: 'oauth',
+        provider: profile.provider,
+        access_token: profile.access_token,
+        refresh_token: profile.refresh_token,
+        expires_at: profile.expires_at,
+      },
+    });
+  }
+
+  private async findExistingUser(
+    tx: Prisma.TransactionClient,
+    profile: TypeUserInfo,
+  ): Promise<User | null> {
+    const account = await tx.account.findFirst({
+      where: {
+        id: profile.id,
+        provider: profile.provider,
+      },
+    });
+
+    if (!account?.userId) {
+      return null;
+    }
+
+    return await this.usersService.findUserById(account.userId);
+  }
+
   private async saveSession(
-    req: Request & { session: Session & { userId?: string; role?: string } },
+    req: AuthenticatedRequest,
     user: User,
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
