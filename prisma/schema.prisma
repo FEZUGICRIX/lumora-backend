@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output = "./__generated__" // TODO: а нужна ли это?
 }
 
 datasource db {
@@ -58,23 +51,21 @@ model User {
   firstName String
   lastName  String?
 
-  role          UserRole      @default(USER)
-  passwordHash  String
-  emailVerified Boolean        @default(false)
-  // refreshTokens RefreshToken[]
+  role          UserRole @default(USER)
+  passwordHash  String?
+  emailVerified Boolean  @default(false)
 
-  isTwoFactorEnabled Boolean @default(false)
-  method            AuthMethod @default(CREDENTIALS)
-  accounts          Account[]
+  isTwoFactorEnabled Boolean    @default(false)
+  method             AuthMethod @default(CREDENTIALS)
+  accounts           Account[]
 
   avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // 🔗 Связи
-  articles   Article[]
-  comments   Comment[]
-  // EmailToken EmailToken[]
+  articles Article[]
+  comments Comment[]
 
   @@index([email])
 }
@@ -85,37 +76,32 @@ model Token {
   token     String    @unique
   type      TokenType
   expiresAt DateTime
+  createdAt DateTime  @default(now())
 }
 
 model Account {
-  id                String   @id @default(uuid())
-  userId            String
-  type              String
-  provider          String
+  id       String @id @default(uuid())
+  userId   String
+  type     String
+  provider String
 
-  // providerAccountId String
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
 
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  token_type       String?
-  scope            String?
-  id_token         String?
-  session_state    String?
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
 
   user User @relation(fields: [userId], references: [id])
 
   @@unique([provider])
   @@index([userId])
 }
-
-
-
-
 
 model Category {
   id       String    @id @default(uuid())
@@ -141,7 +127,6 @@ model Comment {
   article   Article @relation(fields: [articleId], references: [id])
   articleId String
 }
-
 
 enum TokenType {
   VERIFICATION

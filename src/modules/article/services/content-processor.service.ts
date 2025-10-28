@@ -3,7 +3,6 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import sanitizeHtml from 'sanitize-html';
 import { generateHTML } from '@tiptap/html/server';
 import { StarterKit } from '@tiptap/starter-kit';
-import { ContentStats, ArticleAsset } from '@/common/types/article';
 
 import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
