@@ -16,6 +16,8 @@ import {
   CategoryModule,
   CommentModule,
   UploadModule,
+  MailModule,
+  EmailConfirmationModule,
 } from '@/modules';
 
 @Module({
@@ -24,7 +26,6 @@ import {
     ConfigModule.forRoot(appConfig),
     GraphQLModule.forRoot<ApolloDriverConfig>(graphqlConfig),
 
-    // Application Modules
     PrismaModule,
     HealthModule,
     AuthModule,
@@ -33,6 +34,8 @@ import {
     CategoryModule,
     CommentModule,
     UploadModule,
+    MailModule,
+    EmailConfirmationModule,
   ],
 })
 export class AppModule {}

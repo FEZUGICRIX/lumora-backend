@@ -37,6 +37,10 @@ type AuthUrlResponse {
   url: String!
 }
 
+type AuthMessageResponse {
+  message: String!
+}
+
 type Comment {
   id: ID!
   content: String!
@@ -132,9 +136,10 @@ enum SortOrder {
 }
 
 type Mutation {
-  register(registerInput: RegisterInput!): User!
+  register(registerInput: RegisterInput!): AuthMessageResponse!
   login(loginInput: LoginInput!): User!
   logout: Boolean!
+  newVerification(confirmationInput: ConfirmationInput!): Boolean!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   removeArticle(slug: String!): Article!
@@ -161,6 +166,11 @@ input RegisterInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input ConfirmationInput {
+  """Email confirmation"""
+  token: String!
 }
 
 input CreateArticleInput {
