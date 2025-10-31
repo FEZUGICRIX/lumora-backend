@@ -9,7 +9,6 @@ export const appConfig: ConfigModuleOptions = {
 
   // Валидация переменных окружения
   validationSchema: Joi.object({
-    // Application
     NODE_ENV: Joi.string()
       .valid('development', 'production', 'test')
       .default('development'),
@@ -42,11 +41,6 @@ export const appConfig: ConfigModuleOptions = {
     SESSION_PATH: Joi.string().default('/'),
     SESSION_FOLDER: Joi.string().default('sessions:'),
 
-    // JWT
-    JWT_PRIVATE_KEY: Joi.string().required(),
-    JWT_PUBLIC_KEY: Joi.string().required(),
-    COOKIE_SECRET: Joi.string().required(),
-
     // AWS S3
     AWS_S3_REGION: Joi.string().required(),
     AWS_ACCESS_KEY_ID: Joi.string().required(),
@@ -54,8 +48,16 @@ export const appConfig: ConfigModuleOptions = {
     AWS_BUCKET_NAME: Joi.string().required(),
     AWS_PUBLIC_URL: Joi.string().uri().required(),
 
-    // Upload
-    UPLOAD_MAX_FILE_SIZE: Joi.number().default(10 * 1024 * 1024), // 10MB
+    // Google RECAPTCHA
+    GOOGLE_RECAPTCHA_SECRET_KEY: Joi.string().required(),
+
+    // Google OAuth
+    GOOGLE_CLIENT_ID: Joi.string().required(),
+    GOOGLE_CLIENT_SECRET: Joi.string().required(),
+
+    // Resend & email configuration
+    RESEND_API_KEY: Joi.string().required(),
+    MAIL_FROM: Joi.string().required(),
   }),
 
   validationOptions: {

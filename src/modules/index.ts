@@ -6,3 +6,5 @@ export { CategoryModule } from './category/category.module';
 export { CommentModule } from './comment/comment.module';
 export { UploadModule } from './upload/upload.module';
 export { HealthModule } from './health/health.module';
+export { MailModule } from './mail/mail.module';
+export { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';

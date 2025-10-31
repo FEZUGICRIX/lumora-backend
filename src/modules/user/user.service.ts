@@ -18,24 +18,20 @@ export class UserService {
     private readonly usernameService: UsernameService,
   ) {}
 
-  async findUserById(id: string): Promise<User> {
+  async findUserById(id: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { accounts: true },
     });
 
-    if (!user) throw new NotFoundException('User not found');
-
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       include: { accounts: true },
     });
-
-    if (!user) throw new NotFoundException('User with this email not found');
 
     return user;
   }
@@ -85,13 +81,6 @@ export class UserService {
     });
 
     return user ? true : false;
-  }
-
-  async findUserForAuth(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { email },
-      include: { accounts: true },
-    }); // Don't throws error
   }
 
   getAllUsers(): Promise<User[]> {

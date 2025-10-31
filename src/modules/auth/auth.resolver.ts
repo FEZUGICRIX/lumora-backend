@@ -9,7 +9,8 @@ import { ProviderService } from './provider/provider.service';
 
 import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
-import { AuthUrlResponse } from './dto/responses/auth-url-response';
+import { AuthUrlResponse } from './dto/responses/auth-url.response';
+import { AuthMessageResponse } from './dto/responses/auth-message.response';
 
 import { AuthProviderGuard } from './guards/provider.guard';
 
@@ -20,12 +21,9 @@ export class AuthResolver {
     private readonly providerService: ProviderService,
   ) {}
 
-  @Mutation(() => User)
-  register(
-    @Args('registerInput') dto: RegisterInput,
-    @Context('req') req: Request,
-  ) {
-    return this.authService.register(dto, req);
+  @Mutation(() => AuthMessageResponse)
+  register(@Args('registerInput') dto: RegisterInput) {
+    return this.authService.register(dto);
   }
 
   @Mutation(() => User)

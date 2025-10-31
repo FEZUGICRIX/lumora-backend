@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,17 +11,20 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { Prisma, User, AuthMethod, UserRole } from '@prisma/client';
-import type { AuthenticatedRequest } from '@/common/types';
 
 import { UserService } from '@/modules/user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { HashService } from './services/hash.service';
 import { ProviderService } from './provider/provider.service';
+import { BaseOAuthService } from './provider/services/base-oauth.service';
+import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
+
+import type { TypeUserInfo } from './provider/services/types';
+import type { AuthenticatedRequest } from '@/common/types';
 
 import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
-import { BaseOAuthService } from './provider/services/base-oauth.service';
-import { TypeUserInfo } from './provider/services/types';
+import { AuthMessageResponse } from './dto/responses/auth-message.response';
 
 @Injectable()
 export class AuthService {
@@ -29,16 +34,18 @@ export class AuthService {
     private readonly usersService: UserService,
     private readonly hash: HashService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => EmailConfirmationService))
+    private readonly emailConfirmationService: EmailConfirmationService,
   ) {}
 
-  async register(dto: RegisterInput, req: Request): Promise<User> {
+  async register(dto: RegisterInput): Promise<AuthMessageResponse> {
     await this.usersService.checkUser(dto.username, dto.email);
 
     if (dto.password !== dto.passwordRepeat) {
       throw new ConflictException('Passwords do not match');
     }
 
-    const newUser: User = await this.usersService.createUser({
+    const newUser = await this.usersService.createUser({
       username: dto.username,
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -49,10 +56,12 @@ export class AuthService {
       role: UserRole.USER,
     });
 
-    // Create session
-    await this.saveSession(req, newUser);
+    await this.emailConfirmationService.sendVerificationToken(newUser);
 
-    return newUser;
+    return {
+      message:
+        'Вы успешно зарегистрировались. Пожалуйста, подтвердите ваш email. Письмо было отправлено на ваш почтовый адрес',
+    };
   }
 
   async login(dto: LoginInput, req: Request): Promise<User> {
@@ -99,7 +108,28 @@ export class AuthService {
     }
   }
 
-  private getProviderInstance(provider: string) {
+  async saveSession(req: AuthenticatedRequest, user: User): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        req.session.userId = user.id;
+        req.session.role = user.role;
+
+        req.session.save((err) => {
+          if (err) {
+            console.error('Failed to save session for user', user.id, err);
+            return reject(
+              new InternalServerErrorException('Session save failed'),
+            );
+          }
+          resolve();
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  private getProviderInstance(provider: string): BaseOAuthService {
     const providerInstance = this.providerService.findByService(provider);
     if (!providerInstance) {
       throw new NotFoundException(`Provider ${provider} not found`);
@@ -122,7 +152,7 @@ export class AuthService {
     tx: Prisma.TransactionClient,
     req: Request,
     profile: TypeUserInfo,
-  ) {
+  ): Promise<User> {
     const authMethod = this.validateAuthMethod(profile.provider);
 
     const user = await this.usersService.createUser({
@@ -144,13 +174,10 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<User | null> {
-    const user = await this.usersService.findUserForAuth(email);
-
-    if (!user) return null;
+    const user = await this.usersService.findUserByEmail(email);
 
     // ✅ Защита от OAuth логина по паролю
-    if (user.method !== AuthMethod.CREDENTIALS) return null;
-
+    if (!user || user.method !== AuthMethod.CREDENTIALS) return null;
     if (!password || !user.passwordHash) return null;
 
     const isPasswordValid = await this.hash.verifyPassword(
@@ -158,7 +185,16 @@ export class AuthService {
       password,
     );
 
-    return isPasswordValid ? user : null;
+    if (!isPasswordValid) return null;
+
+    if (!user.emailVerified) {
+      await this.emailConfirmationService.sendVerificationToken(user);
+      throw new UnauthorizedException(
+        'Ваш email не подтвержден. Пожалуйста, проверьте вашу почту и подтвердите адрес.',
+      );
+    }
+
+    return user;
   }
 
   private validateAuthMethod(provider: string): AuthMethod {
@@ -173,7 +209,7 @@ export class AuthService {
     tx: Prisma.TransactionClient,
     userId: string,
     profile: TypeUserInfo,
-  ) {
+  ): Promise<void> {
     await tx.account.create({
       data: {
         userId,
@@ -202,29 +238,5 @@ export class AuthService {
     }
 
     return await this.usersService.findUserById(account.userId);
-  }
-
-  private async saveSession(
-    req: AuthenticatedRequest,
-    user: User,
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        req.session.userId = user.id;
-        req.session.role = user.role;
-
-        req.session.save((err) => {
-          if (err) {
-            console.error('Failed to save session for user', user.id, err);
-            return reject(
-              new InternalServerErrorException('Session save failed'),
-            );
-          }
-          resolve();
-        });
-      } catch (e) {
-        reject(e);
-      }
-    });
   }
 }
