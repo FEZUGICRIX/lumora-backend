@@ -36,7 +36,6 @@ export class EmailConfirmationService {
         type: TokenType.VERIFICATION,
       },
     });
-
     if (!existingToken) {
       throw new NotFoundException(
         'Токен Подтверждения не найден. Пожалуйста, убедитесь, что у вас правильный токен',
@@ -46,18 +45,16 @@ export class EmailConfirmationService {
     const isExpired = new Date() > new Date(existingToken.expiresAt);
     if (isExpired)
       throw new BadRequestException(
-        'Токен подтверждения истек. Пожалуйста, запросите новый токен для подтверждения ',
+        'Токен подтверждения истек. Пожалуйста, запросите новый токен для подтверждения',
       );
 
     const existingUser = await this.userService.findUserByEmail(
       existingToken.email,
     );
-
-    if (!existingUser) {
+    if (!existingUser)
       throw new NotFoundException(
-        'Пользователь с указанным адресом электронной почты не найден. Пожалуйста',
+        'Пользователь с указанным адресом электронной почты не найден. Пожалуйста, убедитесь, что вы ввели правильный email',
       );
-    }
 
     await this.prisma.user.update({
       where: {
