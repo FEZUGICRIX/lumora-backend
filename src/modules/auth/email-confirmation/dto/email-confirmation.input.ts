@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
 export class ConfirmationInput {
-  @Field({ description: 'Email confirmation' })
+  @Field({ description: 'Email confirmation token' })
   @IsString({ message: 'Токен должен быть строкой.' })
   @IsNotEmpty({ message: 'Поле токен не может быть пустым' })
   token: string;

@@ -18,6 +18,7 @@ import {
   UploadModule,
   MailModule,
   EmailConfirmationModule,
+  PasswordRecoveryModule,
 } from '@/modules';
 
 @Module({
@@ -36,6 +37,7 @@ import {
     UploadModule,
     MailModule,
     EmailConfirmationModule,
+    PasswordRecoveryModule,
   ],
 })
 export class AppModule {}

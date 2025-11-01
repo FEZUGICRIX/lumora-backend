@@ -151,6 +151,8 @@ type Mutation {
   removeComment(id: Int!): Comment!
   uploadFile(file: Upload!): UploadResponse!
   deleteFile: UploadResponse!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  newPassword(newPasswordInput: NewPasswordInput!): Boolean!
 }
 
 input RegisterInput {
@@ -169,7 +171,7 @@ input LoginInput {
 }
 
 input ConfirmationInput {
-  """Email confirmation"""
+  """Email confirmation token"""
   token: String!
 }
 
@@ -228,3 +230,14 @@ input UpdateCommentInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input ResetPasswordInput {
+  email: String!
+}
+
+input NewPasswordInput {
+  password: String!
+
+  """Reset password token"""
+  token: String!
+}
