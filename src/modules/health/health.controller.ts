@@ -7,6 +7,7 @@ import {
 } from '@nestjs/terminus';
 import { PrismaService } from '@/modules/prisma/prisma.service';
 
+// TODO: Переделать на GraphQl
 @Controller('health')
 export class HealthController {
   constructor(

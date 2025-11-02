@@ -1,36 +1,64 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { render } from '@react-email/components';
-import { Resend } from 'resend';
+import { Resend, type CreateEmailResponse } from 'resend';
 
-import { ConfirmationTemplate } from './templates/confirmation.template';
-import { ResetPasswordTemplate } from './templates/reset-password.template';
+import {
+  ConfirmationTemplate,
+  ResetPasswordTemplate,
+  TwoFactorAuthTemplate,
+} from './templates';
 
 @Injectable()
 export class MailService {
   private readonly resend: Resend;
+  private readonly domain: string;
 
   constructor(private readonly configService: ConfigService) {
+    this.domain = this.configService.getOrThrow<string>('ALLOWED_ORIGIN');
     this.resend = new Resend(
       this.configService.getOrThrow<string>('RESEND_API_KEY'),
     );
   }
 
-  async sendConfirmationEmail(email: string, token: string) {
-    const domain = this.configService.getOrThrow<string>('ALLOWED_ORIGIN');
-    const template = await render(ConfirmationTemplate({ domain, token }));
+  async sendConfirmationEmail(
+    email: string,
+    token: string,
+  ): Promise<CreateEmailResponse> {
+    const template = await render(
+      ConfirmationTemplate({ domain: this.domain, token }),
+    );
 
     return this.sendMail(email, 'Подтверждение почты', template);
   }
 
-  async sendResetPasswordEmail(email: string, token: string) {
-    const domain = this.configService.getOrThrow<string>('ALLOWED_ORIGIN');
-    const template = await render(ResetPasswordTemplate({ domain, token }));
+  async sendResetPasswordEmail(
+    email: string,
+    token: string,
+  ): Promise<CreateEmailResponse> {
+    const template = await render(
+      ResetPasswordTemplate({ domain: this.domain, token }),
+    );
 
-    return this.sendMail(email, 'Сброс пароля ', template);
+    return this.sendMail(email, 'Сброс пароля', template);
   }
 
-  private async sendMail(emailTo: string, subject: string, html: string) {
+  async sendTwoFactorTokenEmail(
+    email: string,
+    token: string,
+  ): Promise<CreateEmailResponse> {
+    const template = await render(
+      TwoFactorAuthTemplate({ domain: this.domain, token }),
+    );
+
+    return this.sendMail(email, 'Подтверждение вашей личности', template);
+  }
+
+  private async sendMail(
+    emailTo: string,
+    subject: string,
+    html: string,
+  ): Promise<CreateEmailResponse> {
     const from = this.configService.getOrThrow<string>('MAIL_FROM');
 
     try {

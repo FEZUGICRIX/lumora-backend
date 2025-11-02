@@ -2,15 +2,13 @@ import { BadRequestException, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import type { Request, Response } from 'express';
 
-import { User } from '../user/entities/user.entity';
-
 import { AuthService } from './auth.service';
 import { ProviderService } from './provider/provider.service';
 
 import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
-import { AuthUrlResponse } from './dto/responses/auth-url.response';
-import { AuthMessageResponse } from './dto/responses/auth-message.response';
+import { MessageResponse, UrlResponse } from '@/shared/dto';
+import { LoginResult } from './unions/login-result.union';
 
 import { AuthProviderGuard } from './guards/provider.guard';
 
@@ -21,12 +19,12 @@ export class AuthResolver {
     private readonly providerService: ProviderService,
   ) {}
 
-  @Mutation(() => AuthMessageResponse)
+  @Mutation(() => MessageResponse)
   register(@Args('registerInput') dto: RegisterInput) {
     return this.authService.register(dto);
   }
 
-  @Mutation(() => User)
+  @Mutation(() => LoginResult)
   login(
     @Args('loginInput') dto: LoginInput,
     @Context() context: { req: Request },
@@ -35,7 +33,7 @@ export class AuthResolver {
   }
 
   @UseGuards(AuthProviderGuard)
-  @Query(() => AuthUrlResponse)
+  @Query(() => UrlResponse)
   async connect(@Args('provider') provider: string) {
     const providerInstance = this.providerService.findByService(provider);
 
