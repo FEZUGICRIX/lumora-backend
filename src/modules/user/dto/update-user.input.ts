@@ -1,8 +1,18 @@
-import { CreateUserInput } from './create-user.input';
-import { InputType, Field, ID, PartialType } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
-export class UpdateUserInput extends PartialType(CreateUserInput) {
-  @Field(() => ID)
-  id: string;
+export class UpdateUserInput {
+  @Field()
+  @IsString()
+  firstName: string;
+
+  @Field()
+  @IsString()
+  lastName: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsBoolean({ message: 'isTwoFactorEnabled Должен быть строкой' })
+  isTwoFactorEnabled: boolean;
 }
