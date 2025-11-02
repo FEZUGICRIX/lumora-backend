@@ -19,6 +19,7 @@ import {
   MailModule,
   EmailConfirmationModule,
   PasswordRecoveryModule,
+  TwoFactorAuthModule,
 } from '@/modules';
 
 @Module({
@@ -38,6 +39,7 @@ import {
     MailModule,
     EmailConfirmationModule,
     PasswordRecoveryModule,
+    TwoFactorAuthModule,
   ],
 })
 export class AppModule {}

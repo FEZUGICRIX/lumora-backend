@@ -77,9 +77,8 @@ export class EmailConfirmationService {
     return true;
   }
 
-  async sendVerificationToken(user: User): Promise<boolean> {
-    const { email, token } = await this.generateVerificationToken(user.email);
-
+  async sendVerificationToken(email: string): Promise<boolean> {
+    const { token } = await this.generateVerificationToken(email);
     await this.mailService.sendConfirmationEmail(email, token);
 
     return true;

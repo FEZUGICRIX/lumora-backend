@@ -9,3 +9,4 @@ export { HealthModule } from './health/health.module';
 export { MailModule } from './mail/mail.module';
 export { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
 export { PasswordRecoveryModule } from './auth/password-recovery/password-recovery.module';
+export { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.module';

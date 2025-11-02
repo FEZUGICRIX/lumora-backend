@@ -18,13 +18,14 @@ import { HashService } from './services/hash.service';
 import { ProviderService } from './provider/provider.service';
 import { BaseOAuthService } from './provider/services/base-oauth.service';
 import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
-
-import type { TypeUserInfo } from './provider/services/types';
-import type { AuthenticatedRequest } from '@/common/types';
+import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
 
 import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
-import { AuthMessageResponse } from './dto/responses/auth-message.response';
+import { MessageResponse } from '@/shared/dto';
+
+import type { TypeUserInfo } from './provider/services/types';
+import type { AuthenticatedRequest } from '@/common/types';
 
 @Injectable()
 export class AuthService {
@@ -36,9 +37,10 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => EmailConfirmationService))
     private readonly emailConfirmationService: EmailConfirmationService,
+    private readonly twoFactorAuthService: TwoFactorAuthService,
   ) {}
 
-  async register(dto: RegisterInput): Promise<AuthMessageResponse> {
+  async register(dto: RegisterInput): Promise<MessageResponse> {
     await this.usersService.checkUser(dto.username, dto.email);
 
     if (dto.password !== dto.passwordRepeat) {
@@ -56,7 +58,7 @@ export class AuthService {
       role: UserRole.USER,
     });
 
-    await this.emailConfirmationService.sendVerificationToken(newUser);
+    await this.emailConfirmationService.sendVerificationToken(newUser.email);
 
     return {
       message:
@@ -64,11 +66,28 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginInput, req: Request): Promise<User> {
+  async login(dto: LoginInput, req: Request): Promise<User | MessageResponse> {
     const user = await this.validateUser(dto.email, dto.password);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // TODO: Вынести в отдельный метод
+    if (user.isTwoFactorEnabled) {
+      if (!dto.code) {
+        await this.twoFactorAuthService.sendTwoFactorToken(user.email);
+
+        return {
+          message:
+            'Проверьте вашу почту. Требуется код двухфакторной аутентификации',
+        };
+      }
+
+      await this.twoFactorAuthService.validateTwoFactorToken(
+        dto.email,
+        dto.code,
+      );
     }
 
     await this.saveSession(req, user);
@@ -188,7 +207,7 @@ export class AuthService {
     if (!isPasswordValid) return null;
 
     if (!user.emailVerified) {
-      await this.emailConfirmationService.sendVerificationToken(user);
+      await this.emailConfirmationService.sendVerificationToken(user.email);
       throw new UnauthorizedException(
         'Ваш email не подтвержден. Пожалуйста, проверьте вашу почту и подтвердите адрес.',
       );
