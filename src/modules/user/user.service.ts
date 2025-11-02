@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { AuthMethod, User } from '@prisma/client';
 
@@ -83,24 +83,19 @@ export class UserService {
     return user ? true : false;
   }
 
-  getAllUsers(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
+  async updateUser(userId: string, dto: UpdateUserInput): Promise<User> {
+    const user = await this.findUserById(userId);
+    if (!user) throw new BadRequestException('Пользователь не найден');
 
-  getUser(username: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { username } });
-  }
-
-  updateUser(id: string, updateUserInput: UpdateUserInput): Promise<User> {
-    return this.prisma.user.update({
-      where: { id },
-      data: updateUserInput,
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        isTwoFactorEnabled: dto.isTwoFactorEnabled,
+      },
     });
-  }
 
-  removeUser(id: string) {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+    return updatedUser;
   }
 }

@@ -31,5 +31,8 @@ export class User {
   emailVerified: boolean;
 
   @Field()
+  isTwoFactorEnabled: boolean;
+
+  @Field()
   createdAt: Date;
 }

@@ -2,14 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type MessageResponse {
-  message: String!
-}
-
-type UrlResponse {
-  url: String!
-}
-
 type User {
   id: ID!
   username: String!
@@ -20,6 +12,7 @@ type User {
   role: UserRole!
   method: AuthMethod!
   emailVerified: Boolean!
+  isTwoFactorEnabled: Boolean!
   createdAt: DateTime!
 }
 
@@ -40,6 +33,14 @@ enum AuthMethod {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type MessageResponse {
+  message: String!
+}
+
+type UrlResponse {
+  url: String!
+}
 
 type Comment {
   id: ID!
@@ -95,6 +96,7 @@ type UploadResponse {
 
 type Query {
   connect(provider: String!): UrlResponse!
+  findProfile: User!
   getArticles(
     """filter by category slug"""
     categorySlugs: [String!]
@@ -140,6 +142,7 @@ type Mutation {
   login(loginInput: LoginInput!): LoginResult!
   logout: Boolean!
   newVerification(confirmationInput: ConfirmationInput!): Boolean!
+  updateProfile(updateProfileInput: UpdateUserInput!): User!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   removeArticle(slug: String!): Article!
@@ -176,6 +179,12 @@ input LoginInput {
 input ConfirmationInput {
   """Email confirmation token"""
   token: String!
+}
+
+input UpdateUserInput {
+  firstName: String!
+  lastName: String!
+  isTwoFactorEnabled: Boolean!
 }
 
 input CreateArticleInput {
