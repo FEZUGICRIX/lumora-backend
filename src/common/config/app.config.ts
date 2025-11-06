@@ -2,15 +2,24 @@ import { ConfigModuleOptions } from '@nestjs/config';
 import { IS_DEV_ENV } from '@/common/utils';
 import * as Joi from 'joi';
 
+const ENV_FILE_PATH = (() => {
+  switch (process.env.NODE_ENV) {
+    case 'docker':
+      return '.env.docker';
+    default:
+      return '.env';
+  }
+})();
+
 export const appConfig: ConfigModuleOptions = {
   isGlobal: true,
-  ignoreEnvFile: !IS_DEV_ENV,
-  envFilePath: IS_DEV_ENV ? '.env' : undefined,
+  ignoreEnvFile: false,
+  envFilePath: ENV_FILE_PATH,
 
   // Валидация переменных окружения
   validationSchema: Joi.object({
     NODE_ENV: Joi.string()
-      .valid('development', 'production', 'test')
+      .valid('development', 'production', 'test', 'docker')
       .default('development'),
     APPLICATION_PORT: Joi.number().default(4200),
     APPLICATION_URL: Joi.string().uri().required(),
