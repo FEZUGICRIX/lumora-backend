@@ -1,16 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRES_URI")
 }
 
 model Article {
@@ -52,16 +46,61 @@ model Article {
 
 model User {
   id        String  @id @default(uuid())
+  username  String  @unique
   email     String  @unique
   firstName String
   lastName  String?
 
+  role          UserRole @default(USER)
+  passwordHash  String?
+  emailVerified Boolean  @default(false)
+
+  isTwoFactorEnabled Boolean    @default(false)
+  method             AuthMethod @default(CREDENTIALS)
+  accounts           Account[]
+
   avatar    String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // 🔗 Связи
   articles Article[]
   comments Comment[]
+
+  @@index([email])
+}
+
+model Token {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+model Account {
+  id       String @id @default(uuid())
+  userId   String
+  type     String
+  provider String
+
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider])
+  @@index([userId])
 }
 
 model Category {
@@ -69,6 +108,8 @@ model Category {
   name     String    @unique
   slug     String    @unique
   articles Article[]
+
+  @@index([slug])
 }
 
 model Comment {
@@ -85,4 +126,21 @@ model Comment {
   // 🔗 Связь с статьёй
   article   Article @relation(fields: [articleId], references: [id])
   articleId String
+}
+
+enum TokenType {
+  VERIFICATION
+  TWO_FACTOR
+  PASSWORD_RESET
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+  GITHUB
 }

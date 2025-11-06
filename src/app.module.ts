@@ -1,35 +1,45 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
+import { ApolloDriverConfig } from '@nestjs/apollo';
 
-import { AppController } from '@/app.controller';
-import { AppService } from '@/app.service';
+// Configuration
+import { appConfig, graphqlConfig } from '@/common/config';
 
-import { PrismaModule } from './modules/prisma/prisma.module';
-import { ArticleModule } from '@/modules/article/article.module';
-import { UserModule } from '@/modules/user/user.module';
-import { CommentModule } from '@/modules/comment/comment.module';
-import { CategoryModule } from '@/modules/category/category.module';
+// Application Modules
+import {
+  PrismaModule,
+  HealthModule,
+  AuthModule,
+  UserModule,
+  ArticleModule,
+  CategoryModule,
+  CommentModule,
+  UploadModule,
+  MailModule,
+  EmailConfirmationModule,
+  PasswordRecoveryModule,
+  TwoFactorAuthModule,
+} from '@/modules';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: true,
-    }),
+    // Framework Modules
+    ConfigModule.forRoot(appConfig),
+    GraphQLModule.forRoot<ApolloDriverConfig>(graphqlConfig),
+
     PrismaModule,
-    ArticleModule,
+    HealthModule,
+    AuthModule,
     UserModule,
-    CommentModule,
+    ArticleModule,
     CategoryModule,
+    CommentModule,
+    UploadModule,
+    MailModule,
+    EmailConfirmationModule,
+    PasswordRecoveryModule,
+    TwoFactorAuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

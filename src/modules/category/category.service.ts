@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from '@/modules/prisma/prisma.service';
-import { generateSlug } from '@/shared/utils';
+import { generateSlug } from '@/common/utils';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

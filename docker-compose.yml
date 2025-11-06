@@ -1,29 +1,51 @@
-version: '3.8'
 services:
   backend:
     container_name: lumora-backend
+    command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
     build: .
     ports:
-      - '3000:3000'
+      - '4200:4200'
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       - db
+      - redis
     volumes:
-      - .:/app
+      # - .:/app
       - /app/node_modules
+    networks:
+      - backend
+    environment:
+      NODE_ENV: docker
 
   db:
+    container_name: lumora-db
     image: postgres:16-alpine
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: lumora
+    env_file:
+      - .env.docker
     ports:
       - '5432:5432'
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    container_name: lumora-redis
+    image: redis:7.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
 
 volumes:
-  pgdata:
+  postgres_data:
+  redis_data:
+
+networks:
+  backend:

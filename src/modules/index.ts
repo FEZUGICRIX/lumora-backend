@@ -1,0 +1,12 @@
+export { PrismaModule } from './prisma/prisma.module';
+export { AuthModule } from './auth/auth.module';
+export { UserModule } from './user/user.module';
+export { ArticleModule } from './article/article.module';
+export { CategoryModule } from './category/category.module';
+export { CommentModule } from './comment/comment.module';
+export { UploadModule } from './upload/upload.module';
+export { HealthModule } from './health/health.module';
+export { MailModule } from './mail/mail.module';
+export { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
+export { PasswordRecoveryModule } from './auth/password-recovery/password-recovery.module';
+export { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.module';

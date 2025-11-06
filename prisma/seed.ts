@@ -1,7 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { HashService } from '../src/modules/auth/services/hash.service';
 
 const prisma = new PrismaClient();
+
+// Инициализация HashService для хеширования паролей
+const hashService = new HashService();
+const hashPassword = (password: string) => hashService.hashPassword(password);
 
 // Функция для генерации slug
 function generateSlug(text: string): string {
@@ -78,16 +83,22 @@ async function main() {
 
   // 🔸 Создаём 10 юзеров
   const users = await Promise.all(
-    Array.from({ length: 10 }).map(() =>
-      prisma.user.create({
+    Array.from({ length: 10 }).map(async () => {
+      const passwordHash = await hashPassword(
+        faker.internet.password({ length: 8 }),
+      );
+
+      return prisma.user.create({
         data: {
           email: faker.internet.email(),
+          username: faker.internet.username(),
           firstName: faker.person.firstName(),
           lastName: faker.person.lastName(),
           avatar: faker.image.avatar(),
+          passwordHash,
         },
-      }),
-    ),
+      });
+    }),
   );
 
   console.log(`✅ Created ${users.length} users`);

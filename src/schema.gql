@@ -4,17 +4,43 @@
 
 type User {
   id: ID!
+  username: String!
   email: String!
   firstName: String!
-  lastName: String!
-  avatar: String!
+  lastName: String
+  avatar: String
+  role: UserRole!
+  method: AuthMethod!
+  emailVerified: Boolean!
+  isTwoFactorEnabled: Boolean!
   createdAt: DateTime!
+}
+
+"""Defines roles available in the system"""
+enum UserRole {
+  USER
+  ADMIN
+}
+
+"""Supported authentication methods"""
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+  GITHUB
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type MessageResponse {
+  message: String!
+}
+
+type UrlResponse {
+  url: String!
+}
 
 type Comment {
   id: ID!
@@ -63,7 +89,14 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+type UploadResponse {
+  message: String!
+  url: String!
+}
+
 type Query {
+  connect(provider: String!): UrlResponse!
+  findProfile: User!
   getArticles(
     """filter by category slug"""
     categorySlugs: [String!]
@@ -86,11 +119,9 @@ type Query {
     search: String
   ): [Article!]!
   getArticleBySlug(slug: String!): Article!
-  getAllUsers: [User!]!
-  getUserById(id: ID!): User
-  comment(id: Int!): Comment!
   getCategories: [Category!]!
   category(slug: String!): Category!
+  comment(id: Int!): Comment!
 }
 
 enum ArticleSortBy {
@@ -107,18 +138,53 @@ enum SortOrder {
 }
 
 type Mutation {
+  register(registerInput: RegisterInput!): MessageResponse!
+  login(loginInput: LoginInput!): LoginResult!
+  logout: Boolean!
+  newVerification(confirmationInput: ConfirmationInput!): Boolean!
+  updateProfile(updateProfileInput: UpdateUserInput!): User!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   removeArticle(slug: String!): Article!
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  removeUser(id: Int!): User!
-  createComment(createCommentInput: CreateCommentInput!): Comment!
-  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
-  removeComment(id: Int!): Comment!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   removeCategory(id: ID!): Category!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
+  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
+  removeComment(id: Int!): Comment!
+  uploadFile(file: Upload!): UploadResponse!
+  deleteFile: UploadResponse!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  newPassword(newPasswordInput: NewPasswordInput!): Boolean!
+}
+
+input RegisterInput {
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  passwordRepeat: String!
+  avatar: String
+}
+
+union LoginResult = User | MessageResponse
+
+input LoginInput {
+  email: String!
+  password: String!
+  code: String
+}
+
+input ConfirmationInput {
+  """Email confirmation token"""
+  token: String!
+}
+
+input UpdateUserInput {
+  firstName: String!
+  lastName: String!
+  isTwoFactorEnabled: Boolean!
 }
 
 input CreateArticleInput {
@@ -152,18 +218,12 @@ input UpdateArticleInput {
   slug: String!
 }
 
-input CreateUserInput {
-  email: String!
-  firstName: String!
-  lastName: String!
-  avatar: String!
+input CreateCategoryInput {
+  name: String!
 }
 
-input UpdateUserInput {
-  email: String
-  firstName: String
-  lastName: String
-  avatar: String
+input UpdateCategoryInput {
+  name: String
   id: ID!
 }
 
@@ -180,11 +240,16 @@ input UpdateCommentInput {
   id: ID!
 }
 
-input CreateCategoryInput {
-  name: String!
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input ResetPasswordInput {
+  email: String!
 }
 
-input UpdateCategoryInput {
-  name: String
-  id: ID!
+input NewPasswordInput {
+  password: String!
+
+  """Reset password token"""
+  token: String!
 }
