@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: lumora-backend
-    command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
+    command: 'node dist/src/main.js'
     build: .
     ports:
       - '4200:4200'

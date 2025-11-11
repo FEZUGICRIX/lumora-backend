@@ -67,7 +67,6 @@
     "multer": "^2.0.2",
     "nanoid": "^5.1.5",
     "pg": "^8.16.3",
-    "prisma": "^6.13.0",
     "react": "^19.2.0",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.3.0",
@@ -77,6 +76,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "prisma": "^6.13.0",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.9.0",
