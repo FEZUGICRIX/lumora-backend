@@ -2,28 +2,32 @@ services:
   backend:
     container_name: lumora-backend
     command: 'node dist/src/main.js'
-    build: .
+    build:
+      context: .
+      args:
+        RUNTIME_ENV: docker
     ports:
       - '4200:4200'
     env_file:
-      - .env.docker
+      - .env
     depends_on:
       - db
       - redis
     volumes:
-      # - .:/app
       - /app/node_modules
     networks:
       - backend
     environment:
       NODE_ENV: docker
+      POSTGRES_URI: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
+
 
   db:
     container_name: lumora-db
     image: postgres:16-alpine
     restart: always
     env_file:
-      - .env.docker
+      - .env
     ports:
       - '5432:5432'
     volumes:

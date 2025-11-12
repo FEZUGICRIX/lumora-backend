@@ -1,20 +1,10 @@
 import { ConfigModuleOptions } from '@nestjs/config';
-import { IS_DEV_ENV } from '@/common/utils';
 import * as Joi from 'joi';
-
-const ENV_FILE_PATH = (() => {
-  switch (process.env.NODE_ENV) {
-    case 'docker':
-      return '.env.docker';
-    default:
-      return '.env';
-  }
-})();
 
 export const appConfig: ConfigModuleOptions = {
   isGlobal: true,
   ignoreEnvFile: false,
-  envFilePath: ENV_FILE_PATH,
+  envFilePath: '.env',
 
   // Валидация переменных окружения
   validationSchema: Joi.object({

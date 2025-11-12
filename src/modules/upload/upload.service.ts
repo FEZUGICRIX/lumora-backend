@@ -14,6 +14,7 @@ export class UploadService {
   private s3: S3Client;
   private bucket: string;
 
+  // TODO: use ConfigService for env
   constructor() {
     this.bucket = process.env.AWS_BUCKET_NAME!;
     this.s3 = new S3Client({
