@@ -234,9 +234,9 @@ export class AuthService {
         userId,
         type: 'oauth',
         provider: profile.provider,
-        access_token: profile.access_token,
-        refresh_token: profile.refresh_token,
-        expires_at: profile.expires_at,
+        accessToken: profile.accessToken,
+        refreshToken: profile.refreshToken,
+        expiresAt: profile.expiresAt,
       },
     });
   }
