@@ -15,6 +15,7 @@ export class MailService {
   private readonly domain: string;
 
   constructor(private readonly configService: ConfigService) {
+    // TODO: подставить адрес фронта
     this.domain = this.configService.getOrThrow<string>('ALLOWED_ORIGIN');
     this.resend = new Resend(
       this.configService.getOrThrow<string>('RESEND_API_KEY'),

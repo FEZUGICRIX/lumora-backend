@@ -33,7 +33,7 @@ export class CreateArticleInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  coverImage?: string; // Было coverImageUrl — теперь как в модели Prisma
+  coverImage?: string;
 
   @Field({ defaultValue: false })
   @IsBoolean()

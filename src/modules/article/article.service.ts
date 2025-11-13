@@ -1,15 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateArticleInput } from './dto/create-article.input';
-import { UpdateArticleInput } from './dto/update-article.input';
-import { generateSlug } from '@/common/utils';
-import {
-  ArticleSortBy,
-  GetArticlesArgs,
-  SortOrder,
-} from './dto/get-articles.args';
+
 import { PrismaService } from '@/modules/prisma/prisma.service';
 import { UploadService } from '@/modules/upload/upload.service';
 import { ContentProcessorService } from './services/content-processor.service';
+
+import { CreateArticleInput } from './dto/create-article.input';
+import { UpdateArticleInput } from './dto/update-article.input';
+import { GetArticlesArgs } from './dto/get-articles.args';
+
+import { ArticleSortBy } from './enums/article.enums';
+import { SortOrder } from '@/common/enums/graphql-enums';
+
+import { generateSlug } from '@/common/utils';
 
 @Injectable()
 export class ArticleService {

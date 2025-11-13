@@ -10,3 +10,9 @@ registerEnumType(AuthMethod, {
   name: 'AuthMethod',
   description: 'Supported authentication methods',
 });
+
+export enum SortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+registerEnumType(SortOrder, { name: 'SortOrder' });

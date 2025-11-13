@@ -31,6 +31,7 @@ export class AuthController {
 
     await this.authService.extractProfileFromCode(req, provider, code);
 
+    // TODO: подставить лучше адрес фронта
     return res.redirect(
       `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/dashboard/settings`,
     );
