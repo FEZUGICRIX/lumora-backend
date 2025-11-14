@@ -16,7 +16,7 @@ import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service'
 import { AuthController } from './auth.controller'
 import { AuthResolver } from './auth.resolver'
 
-import { getProvidersConfig, googleRecaptchaConfig } from '@/common/config'
+import { getProvidersConfig, googleRecaptchaConfig } from '@/core/config'
 
 @Module({
 	imports: [

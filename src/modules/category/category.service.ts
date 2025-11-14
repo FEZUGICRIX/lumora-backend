@@ -6,7 +6,7 @@ import { PrismaService } from '@/core/prisma/prisma.service'
 import { CreateCategoryInput } from './dto/create-category.input'
 import { UpdateCategoryInput } from './dto/update-category.input'
 
-import { generateSlug } from '@/common/utils'
+import { generateSlug } from '@/shared/utils'
 
 @Injectable()
 export class CategoryService {

@@ -20,7 +20,7 @@ import {
 } from '@/modules'
 
 // Configuration
-import { appConfig, graphqlConfig } from '@/common/config'
+import { appConfig, graphqlConfig } from '@/core/config'
 
 @Module({
 	imports: [

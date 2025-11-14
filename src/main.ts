@@ -6,10 +6,12 @@ import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs'
 
 import { CoreModule } from '@/core/core.module'
 
-import { createCorsOptions, createSessionMiddleware } from './common/config'
-import '@/common/enums/graphql-enums'
-import { GraphQLValidationFilter } from '@/common/filters/graphql-validation.filter'
-import { GlobalValidationPipe } from '@/common/pipes/global-validation.pipe'
+import '@/core/graphql/enums'
+
+import { GraphQLValidationFilter } from '@/core/filters/graphql-validation.filter'
+import { GlobalValidationPipe } from '@/core/pipes/global-validation.pipe'
+
+import { createCorsOptions, createSessionMiddleware } from './core/config'
 
 async function bootstrap() {
 	const app: INestApplication = await NestFactory.create(CoreModule)

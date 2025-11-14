@@ -6,7 +6,8 @@ import { join } from 'path'
 
 export const graphqlConfig: ApolloDriverConfig = {
 	driver: ApolloDriver,
-	autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+	autoSchemaFile: join(process.cwd(), 'src/core/graphql/schema.gql'),
+	sortSchema: true,
 	context: ({ req, res }) => ({ req, res }),
 	playground: false,
 	plugins: [ApolloServerPluginLandingPageLocalDefault()],

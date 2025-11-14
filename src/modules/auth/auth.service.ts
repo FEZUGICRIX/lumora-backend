@@ -25,7 +25,7 @@ import { RegisterInput } from './dto/register.input'
 import { MessageResponse } from '@/shared/dto'
 
 import type { TypeUserInfo } from './provider/services/types'
-import type { AuthenticatedRequest } from '@/common/types'
+import type { AuthenticatedRequest } from '@/core/types'
 
 @Injectable()
 export class AuthService {

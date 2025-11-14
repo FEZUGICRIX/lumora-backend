@@ -1,9 +1,8 @@
-import { ArticleSortBy } from '../enums/article.enums'
-
 import { ArgsType, Field, Int } from '@nestjs/graphql'
 import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator'
 
-import { SortOrder } from '@/common/enums/graphql-enums'
+import { ArticleSortBy } from '../enums/article.enums'
+import { SortOrder } from '@/core/graphql/enums'
 
 @ArgsType()
 export class GetArticlesArgs {

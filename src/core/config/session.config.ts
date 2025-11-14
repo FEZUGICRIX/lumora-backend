@@ -4,7 +4,7 @@ import { type RequestHandler } from 'express'
 import session from 'express-session'
 import IORedis from 'ioredis'
 
-import { parseBoolean } from '@/common/utils'
+import { parseBoolean } from '@/shared/utils'
 
 export const createSessionMiddleware = (
 	config: ConfigService,
