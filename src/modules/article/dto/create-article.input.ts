@@ -1,67 +1,67 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
-import { GraphQLJSON } from 'graphql-scalars';
+import { Field, InputType, Int } from '@nestjs/graphql'
 import {
-  IsBoolean,
-  IsDate,
-  IsOptional,
-  IsString,
-  IsArray,
-  IsInt,
-  IsObject,
-} from 'class-validator';
+	IsArray,
+	IsBoolean,
+	IsDate,
+	IsInt,
+	IsObject,
+	IsOptional,
+	IsString,
+} from 'class-validator'
+import { GraphQLJSON } from 'graphql-scalars'
 
 @InputType()
 export class CreateArticleInput {
-  @Field()
-  @IsString()
-  title: string;
+	@Field()
+	@IsString()
+	title: string
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  description: string;
+	@Field({ nullable: true })
+	@IsOptional()
+	@IsString()
+	description: string
 
-  @Field(() => GraphQLJSON)
-  @IsObject()
-  content: any;
+	@Field(() => GraphQLJSON)
+	@IsObject()
+	content: any
 
-  @Field(() => [String], { defaultValue: [] })
-  @IsArray()
-  @IsString({ each: true })
-  tags: string[];
+	@Field(() => [String], { defaultValue: [] })
+	@IsArray()
+	@IsString({ each: true })
+	tags: string[]
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  coverImage?: string;
+	@Field({ nullable: true })
+	@IsOptional()
+	@IsString()
+	coverImage?: string
 
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  published: boolean;
+	@Field({ defaultValue: false })
+	@IsBoolean()
+	published: boolean
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDate()
-  publishedAt?: Date;
+	@Field({ nullable: true })
+	@IsOptional()
+	@IsDate()
+	publishedAt?: Date
 
-  @Field(() => Int, { defaultValue: 0 })
-  @IsInt()
-  readingTime: number;
+	@Field(() => Int, { defaultValue: 0 })
+	@IsInt()
+	readingTime: number
 
-  @Field(() => Int, { defaultValue: 0 })
-  @IsInt()
-  views: number;
+	@Field(() => Int, { defaultValue: 0 })
+	@IsInt()
+	views: number
 
-  @Field(() => Int, { defaultValue: 0 })
-  @IsInt()
-  likes: number;
+	@Field(() => Int, { defaultValue: 0 })
+	@IsInt()
+	likes: number
 
-  @Field()
-  @IsString()
-  authorId: string;
+	@Field()
+	@IsString()
+	authorId: string
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  categoryId?: string;
+	@Field({ nullable: true })
+	@IsOptional()
+	@IsString()
+	categoryId?: string
 }

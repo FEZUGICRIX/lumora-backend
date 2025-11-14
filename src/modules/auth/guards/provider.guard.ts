@@ -1,34 +1,35 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-} from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
-import { ProviderService } from '../provider/provider.service';
+	CanActivate,
+	ExecutionContext,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common'
+import { GqlExecutionContext } from '@nestjs/graphql'
+
+import { ProviderService } from '../provider/provider.service'
 
 @Injectable()
 export class AuthProviderGuard implements CanActivate {
-  constructor(private readonly providerService: ProviderService) {}
+	constructor(private readonly providerService: ProviderService) {}
 
-  canActivate(context: ExecutionContext) {
-    const ctx = GqlExecutionContext.create(context);
-    const args = ctx.getArgs();
+	canActivate(context: ExecutionContext) {
+		const ctx = GqlExecutionContext.create(context)
+		const args = ctx.getArgs()
 
-    const provider = args.provider;
+		const provider = args.provider
 
-    if (!provider) {
-      throw new NotFoundException('Провайдер не указан');
-    }
+		if (!provider) {
+			throw new NotFoundException('Провайдер не указан')
+		}
 
-    const providerInstance = this.providerService.findByService(provider);
+		const providerInstance = this.providerService.findByService(provider)
 
-    if (!providerInstance) {
-      throw new NotFoundException(
-        `Провайдер ${provider} не найден. Пожалуйста, проверьте правильность введенных данных.`,
-      );
-    }
+		if (!providerInstance) {
+			throw new NotFoundException(
+				`Провайдер ${provider} не найден. Пожалуйста, проверьте правильность введенных данных.`,
+			)
+		}
 
-    return true;
-  }
+		return true
+	}
 }

@@ -1,10 +1,10 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export class UploadResponse {
-  @Field()
-  message: string;
+	@Field()
+	message: string
 
-  @Field()
-  url: string;
+	@Field()
+	url: string
 }

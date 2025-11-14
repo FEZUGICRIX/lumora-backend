@@ -1,74 +1,75 @@
-import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
-import { GraphQLJSON } from 'graphql-scalars';
-import { User } from '@/modules/user/entities/user.entity';
-import { Comment } from '@/modules/comment/entities/comment.entity';
-import { Category } from '@/modules/category/entities/category.entity';
+import { Category } from '@/modules/category/entities/category.entity'
+import { Comment } from '@/modules/comment/entities/comment.entity'
+import { User } from '@/modules/user/entities/user.entity'
+
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
+import { GraphQLJSON } from 'graphql-scalars'
 
 @ObjectType()
 export class Article {
-  @Field(() => ID)
-  id: string;
+	@Field(() => ID)
+	id: string
 
-  @Field()
-  title: string;
+	@Field()
+	title: string
 
-  @Field()
-  slug: string;
+	@Field()
+	slug: string
 
-  @Field()
-  description: string;
+	@Field()
+	description: string
 
-  @Field(() => GraphQLJSON)
-  contentJson: any;
+	@Field(() => GraphQLJSON)
+	contentJson: any
 
-  @Field(() => String)
-  contentHtml: string;
+	@Field(() => String)
+	contentHtml: string
 
-  @Field(() => String)
-  contentText: string;
+	@Field(() => String)
+	contentText: string
 
-  @Field(() => [String])
-  tags: string[];
+	@Field(() => [String])
+	tags: string[]
 
-  @Field({ nullable: true })
-  coverImage?: string;
+	@Field({ nullable: true })
+	coverImage?: string
 
-  @Field()
-  published: boolean;
+	@Field()
+	published: boolean
 
-  @Field({ nullable: true })
-  publishedAt?: Date;
+	@Field({ nullable: true })
+	publishedAt?: Date
 
-  @Field()
-  readingTime: number;
+	@Field()
+	readingTime: number
 
-  @Field()
-  views: number;
+	@Field()
+	views: number
 
-  @Field()
-  likes: number;
+	@Field()
+	likes: number
 
-  @Field(() => Int, { nullable: true })
-  commentsCount?: number;
+	@Field(() => Int, { nullable: true })
+	commentsCount?: number
 
-  @Field()
-  createdAt: Date;
+	@Field()
+	createdAt: Date
 
-  @Field()
-  updatedAt: Date;
+	@Field()
+	updatedAt: Date
 
-  @Field({ nullable: true })
-  deletedAt?: Date;
+	@Field({ nullable: true })
+	deletedAt?: Date
 
-  // 🔗 Автор
-  @Field(() => User)
-  author: User;
+	// 🔗 Автор
+	@Field(() => User)
+	author: User
 
-  // 🔗 Категория
-  @Field(() => Category)
-  category: Category;
+	// 🔗 Категория
+	@Field(() => Category)
+	category: Category
 
-  // 🔗 Комментарии
-  @Field(() => [Comment])
-  comments: Comment[] = [];
+	// 🔗 Комментарии
+	@Field(() => [Comment])
+	comments: Comment[] = []
 }

@@ -1,18 +1,18 @@
-import { registerEnumType } from '@nestjs/graphql';
-import { UserRole, AuthMethod } from '@prisma/client';
+import { registerEnumType } from '@nestjs/graphql'
+import { AuthMethod, UserRole } from '@prisma/client'
 
 registerEnumType(UserRole, {
-  name: 'UserRole',
-  description: 'Defines roles available in the system',
-});
+	name: 'UserRole',
+	description: 'Defines roles available in the system',
+})
 
 registerEnumType(AuthMethod, {
-  name: 'AuthMethod',
-  description: 'Supported authentication methods',
-});
+	name: 'AuthMethod',
+	description: 'Supported authentication methods',
+})
 
 export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
+	ASC = 'asc',
+	DESC = 'desc',
 }
-registerEnumType(SortOrder, { name: 'SortOrder' });
+registerEnumType(SortOrder, { name: 'SortOrder' })
