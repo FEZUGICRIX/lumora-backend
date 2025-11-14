@@ -1,12 +1,13 @@
-import { FactoryProvider, ModuleMetadata } from '@nestjs/common';
-import { BaseOAuthService } from './services/base-oauth.service';
+import { FactoryProvider, ModuleMetadata } from '@nestjs/common'
 
-export const ProviderOptionsSymbol = Symbol();
+import { BaseOAuthService } from './services/base-oauth.service'
+
+export const ProviderOptionsSymbol = Symbol()
 
 export type TypeOptions = {
-  baseUrl: string;
-  services: BaseOAuthService[];
-};
+	baseUrl: string
+	services: BaseOAuthService[]
+}
 
 export type TypeAsyncOptions = Pick<ModuleMetadata, 'imports'> &
-  Pick<FactoryProvider<TypeOptions>, 'useFactory' | 'inject'>;
+	Pick<FactoryProvider<TypeOptions>, 'useFactory' | 'inject'>

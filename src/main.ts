@@ -1,26 +1,29 @@
-import { NestFactory } from '@nestjs/core';
-import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
-import cookieParser from 'cookie-parser';
+import { INestApplication } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { NestFactory } from '@nestjs/core'
+import cookieParser from 'cookie-parser'
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs'
 
-import { AppModule } from '@/app.module';
-import { GlobalValidationPipe } from '@/common/pipes/global-validation.pipe';
-import { GraphQLValidationFilter } from '@/common/filters/graphql-validation.filter';
-import { createCorsOptions, createSessionMiddleware } from './common/config';
-import '@/common/enums/graphql-enums';
+import { CoreModule } from '@/core/core.module'
+
+import '@/core/graphql/enums'
+
+import { GraphQLValidationFilter } from '@/core/filters/graphql-validation.filter'
+import { GlobalValidationPipe } from '@/core/pipes/global-validation.pipe'
+
+import { createCorsOptions, createSessionMiddleware } from './core/config'
 
 async function bootstrap() {
-  const app: INestApplication = await NestFactory.create(AppModule);
-  const config = app.get(ConfigService);
+	const app: INestApplication = await NestFactory.create(CoreModule)
+	const config = app.get(ConfigService)
 
-  app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')));
-  app.useGlobalPipes(new GlobalValidationPipe());
-  app.useGlobalFilters(new GraphQLValidationFilter());
-  app.use(createSessionMiddleware(config));
-  app.enableCors(createCorsOptions(config));
-  app.use(graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }));
+	app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
+	app.useGlobalPipes(new GlobalValidationPipe())
+	app.useGlobalFilters(new GraphQLValidationFilter())
+	app.use(createSessionMiddleware(config))
+	app.enableCors(createCorsOptions(config))
+	app.use(graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }))
 
-  await app.listen(config.getOrThrow<number>('APPLICATION_PORT'));
+	await app.listen(config.getOrThrow<number>('APPLICATION_PORT'))
 }
-bootstrap();
+bootstrap()

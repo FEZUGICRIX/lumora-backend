@@ -1,0 +1,255 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Article {
+  author: User!
+  category: Category!
+  comments: [Comment!]!
+  commentsCount: Int
+  contentHtml: String!
+  contentJson: JSON!
+  contentText: String!
+  coverImage: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  id: ID!
+  likes: Float!
+  published: Boolean!
+  publishedAt: DateTime
+  readingTime: Float!
+  slug: String!
+  tags: [String!]!
+  title: String!
+  updatedAt: DateTime!
+  views: Float!
+}
+
+enum ArticleSortBy {
+  COMMENTS
+  CREATED_AT
+  LIKES
+  UPDATED_AT
+  VIEWS
+}
+
+"""Supported authentication methods"""
+enum AuthMethod {
+  CREDENTIALS
+  GITHUB
+  GOOGLE
+}
+
+type Category {
+  articles: [Article!]!
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type Comment {
+  article: Article!
+  articleId: ID!
+  author: User!
+  authorId: ID!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  updatedAt: DateTime!
+}
+
+input ConfirmationInput {
+  """Email confirmation token"""
+  token: String!
+}
+
+input CreateArticleInput {
+  authorId: String!
+  categoryId: String
+  content: JSON!
+  coverImage: String
+  description: String
+  likes: Int! = 0
+  published: Boolean! = false
+  publishedAt: DateTime
+  readingTime: Int! = 0
+  tags: [String!]! = []
+  title: String!
+  views: Int! = 0
+}
+
+input CreateCategoryInput {
+  name: String!
+}
+
+input CreateCommentInput {
+  articleId: String!
+  authorId: String!
+  content: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+input LoginInput {
+  code: String
+  email: String!
+  password: String!
+}
+
+union LoginResult = MessageResponse | User
+
+type MessageResponse {
+  message: String!
+}
+
+type Mutation {
+  createArticle(createArticleInput: CreateArticleInput!): Article!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
+  deleteFile: UploadResponse!
+  login(loginInput: LoginInput!): LoginResult!
+  logout: Boolean!
+  newPassword(newPasswordInput: NewPasswordInput!): Boolean!
+  newVerification(confirmationInput: ConfirmationInput!): Boolean!
+  register(registerInput: RegisterInput!): MessageResponse!
+  removeArticle(slug: String!): Article!
+  removeCategory(id: ID!): Category!
+  removeComment(id: Int!): Comment!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  updateArticle(updateArticleInput: UpdateArticleInput!): Article!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
+  updateProfile(updateProfileInput: UpdateUserInput!): User!
+  uploadFile(file: Upload!): UploadResponse!
+}
+
+input NewPasswordInput {
+  password: String!
+
+  """Reset password token"""
+  token: String!
+}
+
+type Query {
+  category(slug: String!): Category!
+  comment(id: Int!): Comment!
+  connect(provider: String!): UrlResponse!
+  findProfile: User!
+  getArticleBySlug(slug: String!): Article!
+  getArticles(
+    """filter by category slug"""
+    categorySlugs: [String!]
+
+    """ISO date string, from (inclusive)"""
+    dateFrom: String
+
+    """ISO date string, to (inclusive)"""
+    dateTo: String
+    order: SortOrder = DESC
+
+    """simple text search in title/description/content"""
+    search: String
+
+    """offset"""
+    skip: Int
+    sortBy: ArticleSortBy = CREATED_AT
+
+    """limit"""
+    take: Int
+  ): [Article!]!
+  getCategories: [Category!]!
+}
+
+input RegisterInput {
+  avatar: String
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  passwordRepeat: String!
+  username: String!
+}
+
+input ResetPasswordInput {
+  email: String!
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input UpdateArticleInput {
+  authorId: String
+  categoryId: String
+  content: JSON
+  coverImage: String
+  description: String
+  likes: Int = 0
+  published: Boolean = false
+  publishedAt: DateTime
+  readingTime: Int = 0
+  slug: String!
+  tags: [String!] = []
+  title: String
+  views: Int = 0
+}
+
+input UpdateCategoryInput {
+  id: ID!
+  name: String
+}
+
+input UpdateCommentInput {
+  articleId: String
+  authorId: String
+  content: String
+  id: ID!
+}
+
+input UpdateUserInput {
+  firstName: String!
+  isTwoFactorEnabled: Boolean!
+  lastName: String!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type UploadResponse {
+  message: String!
+  url: String!
+}
+
+type UrlResponse {
+  url: String!
+}
+
+type User {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  firstName: String!
+  id: ID!
+  isTwoFactorEnabled: Boolean!
+  lastName: String
+  method: AuthMethod!
+  role: UserRole!
+  username: String!
+}
+
+"""Defines roles available in the system"""
+enum UserRole {
+  ADMIN
+  USER
+}

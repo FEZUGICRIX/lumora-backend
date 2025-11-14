@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
@@ -14,60 +15,66 @@ model Article {
   description String
   tags        String[] @default([])
 
-  contentJson Json
-  contentHtml String
-  contentText String
+  contentJson Json   @map("content_json")
+  contentHtml String @map("content_html")
+  contentText String @map("content_text")
 
-  coverImage  String?
+  coverImage  String?   @map("cover_image")
   published   Boolean   @default(false)
-  publishedAt DateTime?
+  publishedAt DateTime? @map("published_at")
 
-  readingTime Int @default(0)
-  wordCount   Int @default(0)
+  readingTime Int @default(0) @map("reading_time")
+  wordCount   Int @default(0) @map("word_count")
 
   views Int @default(0)
   likes Int @default(0)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   // 🔗 Автор статьи
   author   User   @relation(fields: [authorId], references: [id])
-  authorId String
+  authorId String @map("author_id")
 
   // 🔗 Категория
   category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?
+  categoryId String?   @map("category_id")
 
   // 🔗 Комментарии
   comments Comment[]
+
+  @@index([tags], type: Gin)
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([authorId])
+  @@map("articles")
 }
 
 model User {
   id        String  @id @default(uuid())
   username  String  @unique
   email     String  @unique
-  firstName String
-  lastName  String?
+  firstName String   @map("first_name")
+  lastName  String? @map("last_name")
 
   role          UserRole @default(USER)
-  passwordHash  String?
-  emailVerified Boolean  @default(false)
+  passwordHash  String?  @map("password_hash")
+  emailVerified  Boolean  @default(false) @map("email_verified")
 
-  isTwoFactorEnabled Boolean    @default(false)
+  isTwoFactorEnabled Boolean    @default(false) @map("is_two_factor_enabled")
   method             AuthMethod @default(CREDENTIALS)
   accounts           Account[]
 
   avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // 🔗 Связи
   articles Article[]
   comments Comment[]
 
-  @@index([email])
+  @@map("users")
 }
 
 model Token {
@@ -75,32 +82,35 @@ model Token {
   email     String
   token     String    @unique
   type      TokenType
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("tokens")
 }
 
 model Account {
   id       String @id @default(uuid())
-  userId   String
+  userId   String @map("user_id")
   type     String
   provider String
 
-  refresh_token String?
-  access_token  String?
-  expires_at    Int?
+  refreshToken String? @map("refresh_token")
+  accessToken  String? @map("access_token")
+  expiresAt    DateTime? @map("expires_at")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  token_type    String?
+  tokenType    String? @map("token_type")
   scope         String?
-  id_token      String?
-  session_state String?
+  idToken      String? @map("id_token")
+  sessionState String? @map("session_state")
 
   user User @relation(fields: [userId], references: [id])
 
   @@unique([provider])
   @@index([userId])
+  @@map("accounts")
 }
 
 model Category {
@@ -109,23 +119,27 @@ model Category {
   slug     String    @unique
   articles Article[]
 
-  @@index([slug])
+  @@map("categories")
 }
 
 model Comment {
   id      String @id @default(uuid())
   content String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // 🔗 Связь с автором комментария
   author   User   @relation(fields: [authorId], references: [id])
-  authorId String
+  authorId String @map("author_id")
 
   // 🔗 Связь с статьёй
   article   Article @relation(fields: [articleId], references: [id])
-  articleId String
+  articleId String @map("article_id")
+
+  @@index([articleId])
+  @@index([authorId])
+  @@map("comments")
 }
 
 enum TokenType {
