@@ -30,11 +30,7 @@ export class CreateUserInput {
 
 	// 👤 Персональные данные
 	@Field()
-	firstName: string
-
-	@Field({ nullable: true })
-	@IsOptional()
-	lastName?: string
+	displayName: string
 
 	@Field({ nullable: true })
 	@IsOptional()

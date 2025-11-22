@@ -171,9 +171,8 @@ type Query {
 
 input RegisterInput {
   avatar: String
+  displayName: String!
   email: String!
-  firstName: String!
-  lastName: String!
   password: String!
   passwordRepeat: String!
   username: String!
@@ -217,9 +216,8 @@ input UpdateCommentInput {
 }
 
 input UpdateUserInput {
-  firstName: String!
+  displayName: String!
   isTwoFactorEnabled: Boolean!
-  lastName: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -237,12 +235,11 @@ type UrlResponse {
 type User {
   avatar: String
   createdAt: DateTime!
+  displayName: String!
   email: String!
   emailVerified: Boolean!
-  firstName: String!
   id: ID!
   isTwoFactorEnabled: Boolean!
-  lastName: String
   method: AuthMethod!
   role: UserRole!
   username: String!

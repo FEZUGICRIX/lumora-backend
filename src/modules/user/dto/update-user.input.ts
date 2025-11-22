@@ -5,11 +5,7 @@ import { IsBoolean, IsNotEmpty, IsString } from 'class-validator'
 export class UpdateUserInput {
 	@Field()
 	@IsString()
-	firstName: string
-
-	@Field()
-	@IsString()
-	lastName: string
+	displayName: string
 
 	@Field()
 	@IsNotEmpty()

@@ -55,8 +55,7 @@ model User {
   id        String  @id @default(uuid())
   username  String  @unique
   email     String  @unique
-  firstName String   @map("first_name")
-  lastName  String? @map("last_name")
+  displayName String @map("display_name")
 
   role          UserRole @default(USER)
   passwordHash  String?  @map("password_hash")

@@ -90,8 +90,7 @@ export class UserService {
 		const updatedUser = await this.prisma.user.update({
 			where: { id: user.id },
 			data: {
-				firstName: dto.firstName,
-				lastName: dto.lastName,
+				displayName: dto.displayName,
 				isTwoFactorEnabled: dto.isTwoFactorEnabled,
 			},
 		})

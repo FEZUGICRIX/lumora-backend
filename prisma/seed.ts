@@ -93,8 +93,7 @@ async function main() {
 				data: {
 					email: faker.internet.email(),
 					username: faker.internet.username(),
-					firstName: faker.person.firstName(),
-					lastName: faker.person.lastName(),
+					displayName: faker.person.fullName(),
 					avatar: faker.image.avatar(),
 					passwordHash,
 				},

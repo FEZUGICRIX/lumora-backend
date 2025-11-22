@@ -49,8 +49,7 @@ export class AuthService {
 
 		const newUser = await this.usersService.createUser({
 			username: dto.username,
-			firstName: dto.firstName,
-			lastName: dto.lastName,
+			displayName: dto.displayName,
 			passwordHash: await this.hash.hashPassword(dto.password),
 			email: dto.email,
 			emailVerified: false,
@@ -177,7 +176,7 @@ export class AuthService {
 		const user = await this.usersService.createUser({
 			email: profile.email,
 			method: authMethod,
-			firstName: profile.name,
+			displayName: profile.name,
 			passwordHash: '', // ← в createUser превратится в null
 			avatar: profile.picture,
 			emailVerified: true,

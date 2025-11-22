@@ -13,10 +13,7 @@ export class User {
 	email: string
 
 	@Field()
-	firstName: string
-
-	@Field({ nullable: true })
-	lastName?: string
+	displayName: string
 
 	@Field({ nullable: true })
 	avatar?: string
