@@ -12,20 +12,22 @@ import { ConfigService } from '@nestjs/config'
 import { AuthMethod, Prisma, User, UserRole } from '@prisma/client'
 import type { Request, Response } from 'express'
 
+import { UserService } from '@/modules/user/user.service'
+
 import { EmailConfirmationService } from './email-confirmation/email-confirmation.service'
 import { ProviderService } from './provider/provider.service'
 import { BaseOAuthService } from './provider/services/base-oauth.service'
 import { HashService } from './services/hash.service'
 import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service'
 import { PrismaService } from '@/core/prisma/prisma.service'
-import { UserService } from '@/modules/user/user.service'
 
 import { LoginInput } from './dto/login.input'
 import { RegisterInput } from './dto/register.input'
 import { MessageResponse } from '@/shared/dto'
 
-import type { TypeUserInfo } from './provider/services/types'
 import type { AuthenticatedRequest } from '@/core/types'
+
+import type { TypeUserInfo } from './provider/services/types'
 
 @Injectable()
 export class AuthService {
@@ -173,13 +175,36 @@ export class AuthService {
 	): Promise<User> {
 		const authMethod = this.validateAuthMethod(profile.provider)
 
-		const user = await this.usersService.createUser({
-			email: profile.email,
-			method: authMethod,
-			displayName: profile.name,
-			passwordHash: '', // ← в createUser превратится в null
-			avatar: profile.picture,
-			emailVerified: true,
+		// Проверяем юзера по email — ВСЕ в рамках транзакции
+		const existingUser = await tx.user.findUnique({
+			where: { email: profile.email },
+			include: { accounts: true },
+		})
+
+		// Если уже есть юзер с таким email
+		if (existingUser) {
+			const hasProvider = existingUser.accounts.some(
+				acc => acc.provider === profile.provider,
+			)
+
+			if (!hasProvider) {
+				await this.createAccount(tx, existingUser.id, profile)
+			}
+
+			await this.saveSession(req, existingUser)
+			return existingUser
+		}
+
+		const user = await tx.user.create({
+			data: {
+				email: profile.email,
+				username: profile.email.split('@')[0],
+				method: authMethod,
+				displayName: profile.name,
+				passwordHash: null,
+				avatar: profile.picture,
+				emailVerified: true,
+			},
 		})
 
 		await this.createAccount(tx, user.id, profile)
@@ -255,6 +280,6 @@ export class AuthService {
 			return null
 		}
 
-		return await this.usersService.findUserById(account.userId)
+		return await tx.user.findUnique({ where: { id: account.userId } })
 	}
 }

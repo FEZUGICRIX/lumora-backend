@@ -32,8 +32,7 @@ export const appConfig: ConfigModuleOptions = {
 		// Session & Cookies
 		COOKIES_SECRET: Joi.string().required(),
 		SESSION_SECRET: Joi.string().required(),
-		SESSION_NAME: Joi.string().default('sid'),
-		SESSION_DOMAIN: Joi.string().required(),
+		SESSION_NAME: Joi.string().default('session'),
 		SESSION_MAX_AGE: Joi.number().default(30600000),
 		SESSION_HTTP_ONLY: Joi.boolean().default(true),
 		SESSION_SECURE: Joi.boolean().default(false),

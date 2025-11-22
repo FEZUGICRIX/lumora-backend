@@ -55,7 +55,7 @@ export class BaseOAuthService {
 
 		// Проверяем HTTP статус
 		if (!tokenRequest.ok) {
-			throw new BadRequestException(`Ошибка ssds`)
+			throw new BadRequestException(`Ошибка`)
 		}
 
 		const tokens = await tokenRequest.json()
@@ -84,7 +84,7 @@ export class BaseOAuthService {
 			...userData,
 			accessToken: tokens.access_token,
 			refreshToken: tokens.refresh_token,
-			expiresAt: tokens.expires_at || tokens.expires_in,
+			expiresAt: tokens.expires_at,
 			provider: this.options.name,
 		}
 	}
