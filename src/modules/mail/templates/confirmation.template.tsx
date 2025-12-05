@@ -22,7 +22,7 @@ export const ConfirmationTemplate = ({
   domain,
   token,
 }: ConfirmationTemplateProps) => {
-  const confirmLink = `${domain}/auth/new-verification?token=${token}`;
+  const confirmLink = `${domain}/auth/verify-email?token=${token}`;
 
   return (
     <Tailwind>

@@ -30,11 +30,15 @@ export class AuthController {
 			throw new BadRequestException('Не был предоставлен код авторизации.')
 		}
 
-		await this.authService.extractProfileFromCode(req, provider, code)
+		const { username } = await this.authService.extractProfileFromCode(
+			req,
+			provider,
+			code,
+		)
 
 		// TODO: подставить лучше адрес фронта
 		return res.redirect(
-			`${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/dashboard/settings`,
+			`${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/user/${username}`,
 		)
 	}
 }

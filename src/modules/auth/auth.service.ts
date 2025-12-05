@@ -27,6 +27,8 @@ import { MessageResponse } from '@/shared/dto'
 
 import type { AuthenticatedRequest } from '@/core/types'
 
+import { isDev, parseBoolean } from '@/shared/utils'
+
 import type { TypeUserInfo } from './provider/services/types'
 
 @Injectable()
@@ -121,7 +123,24 @@ export class AuthService {
 				req.session.destroy(error => (error ? reject(error) : resolve()))
 			})
 
-			res.clearCookie(this.configService.get<string>('SESSION_NAME')!)
+			const SESSION_NAME = this.configService.getOrThrow<string>('SESSION_NAME')
+
+			const isProduction = !isDev(this.configService)
+			const domain = isProduction ? undefined : 'localhost'
+
+			const cookieOptions = {
+				path: '/',
+				secure: isProduction,
+				sameSite: isProduction
+					? 'none'
+					: ('lax' as boolean | 'lax' | 'strict' | 'none' | undefined),
+				domain: domain,
+				httpOnly: parseBoolean(
+					this.configService.getOrThrow<string>('SESSION_HTTP_ONLY'),
+				),
+			}
+
+			res.clearCookie(SESSION_NAME, cookieOptions)
 			return true
 		} catch (error) {
 			throw new InternalServerErrorException('Logout failed')

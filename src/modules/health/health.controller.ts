@@ -8,7 +8,6 @@ import {
 
 import { PrismaService } from '@/core/prisma/prisma.service'
 
-// TODO: Переделать на GraphQl
 @Controller('health')
 export class HealthController {
 	constructor(

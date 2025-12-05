@@ -66,6 +66,7 @@ async function main() {
 	await prisma.comment.deleteMany()
 	await prisma.article.deleteMany()
 	await prisma.category.deleteMany()
+	await prisma.account.deleteMany()
 	await prisma.user.deleteMany()
 
 	// 🔸 Создаём категории из уникального списка
