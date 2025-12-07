@@ -48,5 +48,5 @@ export class RegisterInput {
 	@IsString({ message: 'Avatar must be a string' })
 	@IsNotEmpty({ message: 'Avatar cannot be empty', each: true })
 	@IsOptional()
-	avatar?: string
+	avatarUrl?: string
 }

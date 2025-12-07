@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+
 import { PrismaClient } from '@prisma/client'
 
 import { HashService } from '../src/modules/auth/services/hash.service'
@@ -95,7 +96,7 @@ async function main() {
 					email: faker.internet.email(),
 					username: faker.internet.username(),
 					displayName: faker.person.fullName(),
-					avatar: faker.image.avatar(),
+					avatarUrl: faker.image.avatar(),
 					passwordHash,
 				},
 			})

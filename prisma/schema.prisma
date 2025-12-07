@@ -52,20 +52,28 @@ model Article {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  username  String  @unique
-  email     String  @unique
+  id          String @id @default(uuid())
+  username    String @unique
+  email       String @unique
   displayName String @map("display_name")
 
-  role          UserRole @default(USER)
-  passwordHash  String?  @map("password_hash")
-  emailVerified  Boolean  @default(false) @map("email_verified")
+  // Public Profile
+  bio        String?
+  location   String?
+  websiteUrl String? @map("website_url")
+  coverUrl   String? @map("cover_url")
+  avatarUrl  String? @map("avatar_url")
 
+  // Status / Security
+  role               UserRole   @default(USER)
+  passwordHash       String?    @map("password_hash")
+  emailVerified      Boolean    @default(false) @map("email_verified")
   isTwoFactorEnabled Boolean    @default(false) @map("is_two_factor_enabled")
   method             AuthMethod @default(CREDENTIALS)
-  accounts           Account[]
 
-  avatar    String?
+  // Metadata & Relations
+  accounts Account[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -88,26 +96,27 @@ model Token {
 }
 
 model Account {
-  id       String @id @default(uuid())
-  userId   String @map("user_id")
-  type     String
-  provider String
+  id                String @id @default(uuid())
+  userId            String @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String @map("provider_account_id")
 
-  refreshToken String? @map("refresh_token")
-  accessToken  String? @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  accessToken  String?   @map("access_token")
   expiresAt    DateTime? @map("expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   tokenType    String? @map("token_type")
-  scope         String?
+  scope        String?
   idToken      String? @map("id_token")
   sessionState String? @map("session_state")
 
   user User @relation(fields: [userId], references: [id])
 
-  @@unique([provider])
+  @@unique([provider, providerAccountId])
   @@index([userId])
   @@map("accounts")
 }
@@ -134,7 +143,7 @@ model Comment {
 
   // 🔗 Связь с статьёй
   article   Article @relation(fields: [articleId], references: [id])
-  articleId String @map("article_id")
+  articleId String  @map("article_id")
 
   @@index([articleId])
   @@index([authorId])

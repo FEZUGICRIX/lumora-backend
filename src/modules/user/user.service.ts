@@ -3,7 +3,7 @@ import {
 	ConflictException,
 	Injectable,
 } from '@nestjs/common'
-import { AuthMethod, User } from '@prisma/client'
+import { AuthMethod, Prisma, User } from '@prisma/client'
 
 import { UsernameService } from './services/username.service'
 import { PrismaService } from '@/core/prisma/prisma.service'
@@ -30,6 +30,15 @@ export class UserService {
 	async findUserByEmail(email: string): Promise<User | null> {
 		const user = await this.prisma.user.findUnique({
 			where: { email },
+			include: { accounts: true },
+		})
+
+		return user
+	}
+
+	async findUserByUsername(username: string): Promise<User | null> {
+		const user = await this.prisma.user.findUnique({
+			where: { username },
 			include: { accounts: true },
 		})
 
@@ -87,12 +96,37 @@ export class UserService {
 		const user = await this.findUserById(userId)
 		if (!user) throw new BadRequestException('Пользователь не найден')
 
+		if (
+			dto.username &&
+			dto.username !== user.username &&
+			(await this.isUsernameAvailable(dto.username))
+		) {
+			throw new ConflictException('This username is already taken')
+		}
+
+		// Очистка и преобразование DTO
+		// Преобразуем пустые строки (для очистки URL/Bio) в null, как того требует String? в Prisma
+		const dataToUpdate: Prisma.UserUpdateInput = Object.keys(dto).reduce(
+			(acc, key) => {
+				const value = dto[key as keyof UpdateUserInput]
+
+				// Важная момент: если поле равно '', преобразуем его в null.
+				// Это позволяет очистить опциональные поля (URL, Bio) на фронтенде.
+				if (value === '') {
+					acc[key] = null
+				} else if (value !== undefined) {
+					// Если поле передано и не является undefined (то есть имеет значение или null)
+					acc[key] = value
+				}
+
+				return acc
+			},
+			{} as Prisma.UserUpdateInput,
+		)
+
 		const updatedUser = await this.prisma.user.update({
 			where: { id: user.id },
-			data: {
-				displayName: dto.displayName,
-				isTwoFactorEnabled: dto.isTwoFactorEnabled,
-			},
+			data: dataToUpdate,
 		})
 
 		return updatedUser

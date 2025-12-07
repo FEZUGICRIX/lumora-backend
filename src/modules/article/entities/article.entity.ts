@@ -1,9 +1,9 @@
-import { Category } from '@/modules/category/entities/category.entity'
-import { Comment } from '@/modules/comment/entities/comment.entity'
-import { User } from '@/modules/user/entities/user.entity'
-
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
 import { GraphQLJSON } from 'graphql-scalars'
+
+import { Category } from '@/modules/category/entities/category.entity'
+import { Comment } from '@/modules/comment/entities/comment.entity'
+import { UserProfile } from '@/modules/user/entities/user-profile.entity'
 
 @ObjectType()
 export class Article {
@@ -62,8 +62,8 @@ export class Article {
 	deletedAt?: Date
 
 	// 🔗 Автор
-	@Field(() => User)
-	author: User
+	@Field(() => UserProfile)
+	author: UserProfile
 
 	// 🔗 Категория
 	@Field(() => Category)

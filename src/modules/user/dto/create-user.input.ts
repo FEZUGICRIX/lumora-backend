@@ -34,7 +34,7 @@ export class CreateUserInput {
 
 	@Field({ nullable: true })
 	@IsOptional()
-	avatar?: string
+	avatarUrl?: string
 
 	// ⚙️ Системные поля
 	@Field(() => UserRole, { defaultValue: UserRole.USER })

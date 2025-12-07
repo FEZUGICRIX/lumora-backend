@@ -1,15 +1,15 @@
-import { User } from '@/modules/user/entities/user.entity'
-
 import { createUnionType } from '@nestjs/graphql'
+
+import { UserProfile } from '@/modules/user/entities/user-profile.entity'
 
 import { MessageResponse } from '@/shared/dto'
 
 export const LoginResult = createUnionType({
 	name: 'LoginResult',
-	types: () => [User, MessageResponse] as const,
+	types: () => [UserProfile, MessageResponse] as const,
 	resolveType(value) {
 		if ('email' in value) {
-			return User
+			return UserProfile
 		}
 		if ('message' in value) {
 			return MessageResponse

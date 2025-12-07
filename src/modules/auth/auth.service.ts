@@ -151,6 +151,7 @@ export class AuthService {
 		return new Promise<void>((resolve, reject) => {
 			try {
 				req.session.userId = user.id
+				req.session.username = user.username
 				req.session.role = user.role
 
 				req.session.save(err => {
@@ -221,14 +222,25 @@ export class AuthService {
 				method: authMethod,
 				displayName: profile.name,
 				passwordHash: null,
-				avatar: profile.picture,
+				avatarUrl: profile.picture,
 				emailVerified: true,
+
+				// ✅ Чистый способ создать User и Account одной транзакцией
+				accounts: {
+					create: {
+						type: 'oauth',
+						provider: profile.provider,
+						providerAccountId: profile.id,
+						accessToken: profile.accessToken,
+						refreshToken: profile.refreshToken,
+						expiresAt: profile.expiresAt,
+						// ... другие поля токенов
+					},
+				},
 			},
 		})
 
-		await this.createAccount(tx, user.id, profile)
 		await this.saveSession(req, user)
-
 		return user
 	}
 
@@ -272,11 +284,22 @@ export class AuthService {
 		userId: string,
 		profile: TypeUserInfo,
 	): Promise<void> {
+		// ✅ Строгая проверка наличия критического ID
+		// Это предотвратит ошибку Prisma, если провайдер не вернул ID.
+		if (!profile.id || typeof profile.id !== 'string') {
+			throw new InternalServerErrorException(
+				`OAuth provider '${profile.provider}' did not return a valid unique ID.`,
+			)
+		}
+
 		await tx.account.create({
 			data: {
 				userId,
 				type: 'oauth',
 				provider: profile.provider,
+
+				providerAccountId: profile.id,
+
 				accessToken: profile.accessToken,
 				refreshToken: profile.refreshToken,
 				expiresAt: profile.expiresAt,
@@ -288,10 +311,14 @@ export class AuthService {
 		tx: Prisma.TransactionClient,
 		profile: TypeUserInfo,
 	): Promise<User | null> {
+		// 1. Поиск Account по композитному уникальному ключу
 		const account = await tx.account.findFirst({
 			where: {
-				id: profile.id,
 				provider: profile.provider,
+				providerAccountId: profile.id, // ID провайдера, полученный из профиля (Google ID, GitHub ID и т.д.)
+			},
+			select: {
+				userId: true, // Нам нужен только ID пользователя для дальнейшего поиска
 			},
 		})
 
@@ -299,6 +326,8 @@ export class AuthService {
 			return null
 		}
 
+		// 2. Поиск User по найденному userId
+		// Используем findUnique с явным указанием id для максимальной надежности
 		return await tx.user.findUnique({ where: { id: account.userId } })
 	}
 }

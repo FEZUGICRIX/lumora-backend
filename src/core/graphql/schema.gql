@@ -3,7 +3,7 @@
 # ------------------------------------------------------
 
 type Article {
-  author: User!
+  author: UserProfile!
   category: Category!
   comments: [Comment!]!
   commentsCount: Int
@@ -41,6 +41,11 @@ enum AuthMethod {
   GOOGLE
 }
 
+type AuthMinimalData {
+  id: ID!
+  username: String!
+}
+
 type Category {
   articles: [Article!]!
   id: ID!
@@ -51,7 +56,7 @@ type Category {
 type Comment {
   article: Article!
   articleId: ID!
-  author: User!
+  author: UserProfile!
   authorId: ID!
   content: String!
   createdAt: DateTime!
@@ -105,7 +110,7 @@ input LoginInput {
   password: String!
 }
 
-union LoginResult = MessageResponse | User
+union LoginResult = MessageResponse | UserProfile
 
 type MessageResponse {
   message: String!
@@ -128,7 +133,7 @@ type Mutation {
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateComment(updateCommentInput: UpdateCommentInput!): Comment!
-  updateProfile(updateProfileInput: UpdateUserInput!): User!
+  updateProfile(updateProfileInput: UpdateUserInput!): UserProfile!
   uploadFile(file: Upload!): UploadResponse!
 }
 
@@ -143,7 +148,8 @@ type Query {
   category(slug: String!): Category!
   comment(id: Int!): Comment!
   connect(provider: String!): UrlResponse!
-  findProfile: User!
+  currentAuthMinimal: AuthMinimalData!
+  findProfile: UserProfile!
   getArticleBySlug(slug: String!): Article!
   getArticles(
     """filter by category slug"""
@@ -167,10 +173,11 @@ type Query {
     take: Int
   ): [Article!]!
   getCategories: [Category!]!
+  user(username: String!): UserPublicProfile!
 }
 
 input RegisterInput {
-  avatar: String
+  avatarUrl: String
   displayName: String!
   email: String!
   password: String!
@@ -216,8 +223,14 @@ input UpdateCommentInput {
 }
 
 input UpdateUserInput {
-  displayName: String!
-  isTwoFactorEnabled: Boolean!
+  avatarUrl: String
+  bio: String
+  coverUrl: String
+  displayName: String
+  isTwoFactorEnabled: Boolean
+  location: String
+  username: String
+  websiteUrl: String
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -232,17 +245,34 @@ type UrlResponse {
   url: String!
 }
 
-type User {
-  avatar: String
+type UserProfile {
+  avatarUrl: String
+  bio: String
+  coverUrl: String
   createdAt: DateTime!
   displayName: String!
   email: String!
   emailVerified: Boolean!
   id: ID!
   isTwoFactorEnabled: Boolean!
+  location: String
   method: AuthMethod!
   role: UserRole!
   username: String!
+  websiteUrl: String
+}
+
+type UserPublicProfile {
+  avatarUrl: String
+  bio: String
+  coverUrl: String
+  createdAt: DateTime!
+  displayName: String!
+  id: ID!
+  location: String
+  role: UserRole!
+  username: String!
+  websiteUrl: String
 }
 
 """Defines roles available in the system"""
