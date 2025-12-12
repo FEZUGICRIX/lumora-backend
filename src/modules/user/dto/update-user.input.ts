@@ -1,5 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql'
 import { IsBoolean, IsOptional, IsString, IsUrl } from 'class-validator'
+import { GraphQLJSON } from 'graphql-scalars'
+
+import { IsTipTapDoc } from '@/shared/validators'
 
 @InputType()
 export class UpdateUserInput {
@@ -12,6 +15,11 @@ export class UpdateUserInput {
 	@IsString()
 	@IsOptional()
 	displayName?: string
+
+	@Field(() => GraphQLJSON, { nullable: true })
+	@IsTipTapDoc() // Валидацию структуры контента
+	@IsOptional()
+	readmeContent?: any // TODO: поставить нормальный тип
 
 	@Field({ nullable: true })
 	@IsString()

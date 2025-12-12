@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { UserRole } from '@prisma/client'
+import { GraphQLJSON } from 'graphql-scalars'
 
 // Назначение: Публичное представление профиля. Используется для отображения
 // данных любого пользователя (например, автора статьи или списка пользователей).
@@ -15,6 +16,9 @@ export class UserPublicProfile {
 
 	@Field()
 	displayName: string
+
+	@Field(() => GraphQLJSON, { nullable: true })
+	readmeContent?: any // TODO: поставить нормальный тип
 
 	@Field({ nullable: true })
 	bio?: string

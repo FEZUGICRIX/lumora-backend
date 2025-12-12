@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { AuthMethod, UserRole } from '@prisma/client'
+import { GraphQLJSON } from 'graphql-scalars'
 
 // Назначение: Полный, приватный профиль. Используется исключительно для запросов
 // авторизованного пользователя, запрашивающего СВОИ данные (например, Query findProfile).
@@ -17,6 +18,9 @@ export class UserProfile {
 
 	@Field()
 	displayName: string
+
+	@Field(() => GraphQLJSON, { nullable: true })
+	readmeContent?: any // TODO: поставить нормальный тип
 
 	@Field({ nullable: true })
 	bio?: string

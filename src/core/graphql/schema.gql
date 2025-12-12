@@ -229,6 +229,7 @@ input UpdateUserInput {
   displayName: String
   isTwoFactorEnabled: Boolean
   location: String
+  readmeContent: JSON
   username: String
   websiteUrl: String
 }
@@ -257,6 +258,7 @@ type UserProfile {
   isTwoFactorEnabled: Boolean!
   location: String
   method: AuthMethod!
+  readmeContent: JSON
   role: UserRole!
   username: String!
   websiteUrl: String
@@ -270,6 +272,7 @@ type UserPublicProfile {
   displayName: String!
   id: ID!
   location: String
+  readmeContent: JSON
   role: UserRole!
   username: String!
   websiteUrl: String
