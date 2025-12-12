@@ -58,11 +58,12 @@ model User {
   displayName String @map("display_name")
 
   // Public Profile
-  bio        String?
-  location   String?
-  websiteUrl String? @map("website_url")
-  coverUrl   String? @map("cover_url")
-  avatarUrl  String? @map("avatar_url")
+  readmeContent Json?   @map("readme_content")
+  bio           String?
+  location      String?
+  websiteUrl    String? @map("website_url")
+  coverUrl      String? @map("cover_url")
+  avatarUrl     String? @map("avatar_url")
 
   // Status / Security
   role               UserRole   @default(USER)
