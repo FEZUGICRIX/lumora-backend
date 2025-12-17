@@ -3,7 +3,7 @@ import { GraphQLJSON } from 'graphql-scalars'
 
 import { Category } from '@/modules/category/entities/category.entity'
 import { Comment } from '@/modules/comment/entities/comment.entity'
-import { UserProfile } from '@/modules/user/entities/user-profile.entity'
+import { UserPublicProfile } from '@/modules/user/entities/user-public-profile.entity'
 
 @ObjectType()
 export class Article {
@@ -62,8 +62,8 @@ export class Article {
 	deletedAt?: Date
 
 	// 🔗 Автор
-	@Field(() => UserProfile)
-	author: UserProfile
+	@Field(() => UserPublicProfile)
+	author: UserPublicProfile
 
 	// 🔗 Категория
 	@Field(() => Category)

@@ -1,13 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql'
+import { IsString } from 'class-validator'
 
 @InputType()
 export class CreateCommentInput {
-	@Field({ nullable: true })
+	@Field()
+	@IsString()
 	content: string
 
 	@Field()
-	authorId: string
-
-	@Field()
+	@IsString()
 	articleId: string
 }

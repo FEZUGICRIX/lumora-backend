@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { Article } from '@/modules/article/entities/article.entity'
-import { UserProfile } from '@/modules/user/entities/user-profile.entity'
+import { UserPublicProfile } from '@/modules/user/entities/user-public-profile.entity'
 
 @ObjectType()
 export class Comment {
@@ -17,8 +17,8 @@ export class Comment {
 	@Field()
 	updatedAt: Date
 
-	@Field(() => UserProfile)
-	author: UserProfile
+	@Field(() => UserPublicProfile)
+	author: UserPublicProfile
 
 	@Field(() => ID)
 	authorId: string

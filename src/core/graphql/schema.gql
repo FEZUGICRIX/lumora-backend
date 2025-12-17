@@ -3,7 +3,7 @@
 # ------------------------------------------------------
 
 type Article {
-  author: UserProfile!
+  author: UserPublicProfile!
   category: Category!
   comments: [Comment!]!
   commentsCount: Int
@@ -56,7 +56,7 @@ type Category {
 type Comment {
   article: Article!
   articleId: ID!
-  author: UserProfile!
+  author: UserPublicProfile!
   authorId: ID!
   content: String!
   createdAt: DateTime!
@@ -90,8 +90,7 @@ input CreateCategoryInput {
 
 input CreateCommentInput {
   articleId: String!
-  authorId: String!
-  content: String
+  content: String!
 }
 
 """
@@ -128,7 +127,7 @@ type Mutation {
   register(registerInput: RegisterInput!): MessageResponse!
   removeArticle(slug: String!): Article!
   removeCategory(id: ID!): Category!
-  removeComment(id: Int!): Comment!
+  removeComment(id: String!): Comment!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
@@ -217,7 +216,6 @@ input UpdateCategoryInput {
 
 input UpdateCommentInput {
   articleId: String
-  authorId: String
   content: String
   id: ID!
 }

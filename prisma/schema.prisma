@@ -143,7 +143,7 @@ model Comment {
   authorId String @map("author_id")
 
   // 🔗 Связь с статьёй
-  article   Article @relation(fields: [articleId], references: [id])
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   articleId String  @map("article_id")
 
   @@index([articleId])
