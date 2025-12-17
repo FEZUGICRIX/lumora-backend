@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import {
+	ForbiddenException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common'
+import { Comment } from '@prisma/client'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
 
@@ -7,10 +12,27 @@ import { UpdateCommentInput } from './dto/update-comment.input'
 
 @Injectable()
 export class CommentService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {}
 
-	create(createCommentInput: CreateCommentInput) {
-		return this.prisma.comment.create({ data: createCommentInput })
+	async create(
+		authorId: string,
+		createCommentInput: CreateCommentInput,
+	): Promise<Comment> {
+		// Проверка существования статьи (Самая важная часть)
+		const article = await this.prisma.article.findUnique({
+			where: { id: createCommentInput.articleId },
+			select: { id: true }, // Оптимизация: запрашиваем только ID
+		})
+
+		if (!article) {
+			throw new NotFoundException(
+				`Article with ID ${createCommentInput.articleId} not found.`,
+			)
+		}
+
+		return this.prisma.comment.create({
+			data: { ...createCommentInput, authorId },
+		})
 	}
 
 	findAll() {
@@ -23,16 +45,26 @@ export class CommentService {
 		})
 	}
 
-	update(id: string, updateCommentInput: UpdateCommentInput) {
+	async update(
+		id: string,
+		updateCommentInput: UpdateCommentInput,
+		userId: string,
+	) {
+		const comment = await this.prisma.comment.findUnique({ where: { id } })
+		if (!comment) throw new NotFoundException('Comment not found')
+		if (comment.authorId !== userId) throw new ForbiddenException('Not allowed')
+
 		return this.prisma.comment.update({
 			where: { id },
 			data: updateCommentInput,
 		})
 	}
 
-	remove(id: string) {
-		return this.prisma.comment.delete({
-			where: { id },
-		})
+	async remove(id: string, userId: string) {
+		const comment = await this.prisma.comment.findUnique({ where: { id } })
+		if (!comment) throw new NotFoundException('Comment not found')
+		if (comment.authorId !== userId) throw new ForbiddenException('Not allowed')
+
+		return this.prisma.comment.delete({ where: { id } })
 	}
 }
