@@ -231,7 +231,6 @@ export class ArticleService {
 
 		// --- Comment reactions ---
 		const commentIds = article.comments.map(c => c.id)
-
 		const commentReactions =
 			commentIds.length > 0
 				? await this.reactionService.getReactionsSummaryForTargets(
@@ -241,20 +240,34 @@ export class ArticleService {
 				: {}
 
 		let myCommentReactions: Record<string, Record<string, boolean>> = {}
+		let myArticleReactions: Record<string, Record<string, boolean>> = {}
 
-		if (userId && commentIds.length > 0) {
-			myCommentReactions =
-				await this.reactionService.getUserReactionsForTargets(
+		if (userId) {
+			const [myCommentReactionsRes, myArticleReactionsRes] = await Promise.all([
+				commentIds.length > 0
+					? this.reactionService.getUserReactionsForTargets(
+							userId,
+							ReactionTargetType.COMMENT,
+							commentIds,
+						)
+					: {},
+				this.reactionService.getUserReactionsForTargets(
 					userId,
-					ReactionTargetType.COMMENT,
-					commentIds,
-				)
+					ReactionTargetType.ARTICLE,
+					[article.id],
+				),
+			])
+
+			myCommentReactions = myCommentReactionsRes
+			myArticleReactions = myArticleReactionsRes
 		}
 
 		return {
 			...article,
 			commentsCount: article._count?.comments ?? 0,
 			reactions: articleReactions[article.id] ?? {},
+			myReactions: myArticleReactions[article.id] ?? {},
+
 			comments: article.comments.map(comment => ({
 				...comment,
 				reactions: commentReactions[comment.id] ?? {},
