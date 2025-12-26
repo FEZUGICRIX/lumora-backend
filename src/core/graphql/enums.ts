@@ -1,5 +1,10 @@
 import { registerEnumType } from '@nestjs/graphql'
-import { AuthMethod, UserRole } from '@prisma/client'
+import {
+	AuthMethod,
+	ReactionTargetType,
+	ReactionType,
+	UserRole,
+} from '@prisma/client'
 
 registerEnumType(UserRole, {
 	name: 'UserRole',
@@ -9,6 +14,16 @@ registerEnumType(UserRole, {
 registerEnumType(AuthMethod, {
 	name: 'AuthMethod',
 	description: 'Supported authentication methods',
+})
+
+registerEnumType(ReactionTargetType, {
+	name: 'ReactionTargetType',
+	description: 'Target entity type for reactions',
+})
+
+registerEnumType(ReactionType, {
+	name: 'ReactionType',
+	description: 'Reaction type enum',
 })
 
 export enum SortOrder {

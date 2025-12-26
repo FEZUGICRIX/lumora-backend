@@ -3,16 +3,20 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common'
-import { Comment } from '@prisma/client'
+import { Comment, ReactionTargetType } from '@prisma/client'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
+import { ReactionService } from '../reaction/reaction.service'
 
 import { CreateCommentInput } from './dto/create-comment.input'
 import { UpdateCommentInput } from './dto/update-comment.input'
 
 @Injectable()
 export class CommentService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly reactionService: ReactionService,
+	) {}
 
 	async create(
 		authorId: string,
@@ -35,14 +39,24 @@ export class CommentService {
 		})
 	}
 
-	findAll() {
-		return this.prisma.comment.findMany()
-	}
-
-	findOne(id: string) {
-		return this.prisma.comment.findUnique({
+	async getComment(id: string) {
+		const comment = await this.prisma.comment.findUnique({
 			where: { id },
 		})
+
+		if (!comment) {
+			throw new NotFoundException(`Comment with id ${id} not found`)
+		}
+
+		const reactions = await this.reactionService.getReactionsSummaryForTargets(
+			ReactionTargetType.COMMENT,
+			[comment.id],
+		)
+
+		return {
+			...comment,
+			reactions: reactions[comment.id] ?? {},
+		}
 	}
 
 	async update(
@@ -60,11 +74,23 @@ export class CommentService {
 		})
 	}
 
-	async remove(id: string, userId: string) {
+	async remove(id: string, userId: string): Promise<boolean> {
 		const comment = await this.prisma.comment.findUnique({ where: { id } })
 		if (!comment) throw new NotFoundException('Comment not found')
 		if (comment.authorId !== userId) throw new ForbiddenException('Not allowed')
 
-		return this.prisma.comment.delete({ where: { id } })
+		await this.prisma.$transaction([
+			this.prisma.reaction.deleteMany({
+				where: {
+					targetType: ReactionTargetType.COMMENT,
+					targetId: comment.id,
+				},
+			}),
+			this.prisma.comment.delete({
+				where: { id },
+			}),
+		])
+
+		return true
 	}
 }

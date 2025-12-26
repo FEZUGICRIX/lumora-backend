@@ -27,7 +27,6 @@ model Article {
   wordCount   Int @default(0) @map("word_count")
 
   views Int @default(0)
-  likes Int @default(0)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -79,10 +78,49 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // 🔗 Связи
-  articles Article[]
-  comments Comment[]
+  articles  Article[]
+  comments  Comment[]
+  reactions Reaction[]
 
   @@map("users")
+}
+
+model Reaction {
+  id         String             @id @default(uuid())
+  type       ReactionType
+  userId     String
+  targetId   String // ID сущности, на которую ставим реакцию
+  targetType ReactionTargetType
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetId, targetType])
+  @@index([targetId, type])
+  @@index([targetId, targetType])
+  @@index([targetType])
+  @@index([userId])
+  @@map("reactions")
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  FIRE
+  BOOKMARK
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+  POOP
+  CLOWN
+}
+
+enum ReactionTargetType {
+  ARTICLE
+  COMMENT
+  PROFILE
 }
 
 model Token {

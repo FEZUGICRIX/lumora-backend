@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
-import { PrismaModule } from '../../core/prisma/prisma.module'
+import { ReactionModule } from '../reaction/reaction.module'
+import { UserModule } from '../user/user.module'
 
 import { UploadService } from '../upload/upload.service'
 import { ArticleService } from './article.service'
@@ -15,6 +16,6 @@ import { ArticleResolver } from './article.resolver'
 		ContentProcessorService,
 		UploadService,
 	],
-	imports: [PrismaModule],
+	imports: [ReactionModule, UserModule],
 })
 export class ArticleModule {}

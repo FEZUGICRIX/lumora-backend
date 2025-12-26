@@ -149,7 +149,7 @@ async function main() {
 					readingTime,
 					wordCount,
 					views: faker.number.int({ min: 1000, max: 30000 }),
-					likes: faker.number.int({ min: 100, max: 5000 }),
+					// likes: faker.number.int({ min: 100, max: 5000 }),
 					authorId: author.id,
 					categoryId: category.id,
 				},

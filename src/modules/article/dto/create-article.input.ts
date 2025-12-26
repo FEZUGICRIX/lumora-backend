@@ -52,10 +52,6 @@ export class CreateArticleInput {
 	@IsInt()
 	views: number
 
-	@Field(() => Int, { defaultValue: 0 })
-	@IsInt()
-	likes: number
-
 	@Field()
 	@IsString()
 	authorId: string

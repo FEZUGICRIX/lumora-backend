@@ -6,6 +6,9 @@ import { CreateArticleInput } from './dto/create-article.input'
 import { GetArticlesArgs } from './dto/get-articles.args'
 import { UpdateArticleInput } from './dto/update-article.input'
 
+import { Authorization } from '../auth/decorators/auth.decorator'
+import { Authorized } from '../auth/decorators/authorized.decorator'
+
 import { Article } from './entities/article.entity'
 
 @Resolver(() => Article)
@@ -25,9 +28,13 @@ export class ArticleResolver {
 		return this.articleService.findAll(args)
 	}
 
+	@Authorization({ optional: true })
 	@Query(() => Article, { name: 'getArticleBySlug' })
-	findOne(@Args('slug', { type: () => String }) slug: string) {
-		return this.articleService.findBySlug(slug)
+	findOne(
+		@Args('slug', { type: () => String }) slug: string,
+		@Authorized('id') userId?: string,
+	) {
+		return this.articleService.findBySlug(slug, userId)
 	}
 
 	@Mutation(() => Article)
@@ -41,7 +48,7 @@ export class ArticleResolver {
 		)
 	}
 
-	@Mutation(() => Article)
+	@Mutation(() => Boolean)
 	removeArticle(@Args('slug', { type: () => String }) slug: string) {
 		return this.articleService.remove(slug)
 	}

@@ -15,9 +15,10 @@ type Article {
   deletedAt: DateTime
   description: String!
   id: ID!
-  likes: Float!
+  myReactions: JSON
   published: Boolean!
   publishedAt: DateTime
+  reactions: JSON
   readingTime: Float!
   slug: String!
   tags: [String!]!
@@ -29,7 +30,6 @@ type Article {
 enum ArticleSortBy {
   COMMENTS
   CREATED_AT
-  LIKES
   UPDATED_AT
   VIEWS
 }
@@ -61,6 +61,8 @@ type Comment {
   content: String!
   createdAt: DateTime!
   id: ID!
+  myReactions: JSON
+  reactions: JSON
   updatedAt: DateTime!
 }
 
@@ -75,7 +77,6 @@ input CreateArticleInput {
   content: JSON!
   coverImage: String
   description: String
-  likes: Int! = 0
   published: Boolean! = false
   publishedAt: DateTime
   readingTime: Int! = 0
@@ -125,10 +126,11 @@ type Mutation {
   newPassword(newPasswordInput: NewPasswordInput!): Boolean!
   newVerification(confirmationInput: ConfirmationInput!): Boolean!
   register(registerInput: RegisterInput!): MessageResponse!
-  removeArticle(slug: String!): Article!
+  removeArticle(slug: String!): Boolean!
   removeCategory(id: ID!): Category!
-  removeComment(id: String!): Comment!
+  removeComment(id: String!): Boolean!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  toggleReaction(input: ToggleReactionInput!): Boolean!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateComment(updateCommentInput: UpdateCommentInput!): Comment!
@@ -172,7 +174,46 @@ type Query {
     take: Int
   ): [Article!]!
   getCategories: [Category!]!
+  myReactions: [Reaction!]!
+  reactionSummary(targetId: String!, targetType: ReactionTargetType!): [ReactionSummaryDto!]!
+  reactions(targetId: String!, targetType: ReactionTargetType!): [Reaction!]!
   user(username: String!): UserPublicProfile!
+}
+
+type Reaction {
+  createdAt: DateTime!
+  id: ID!
+  targetId: String!
+  targetType: ReactionTargetType!
+  type: ReactionType!
+  user: UserPublicProfile!
+}
+
+type ReactionSummaryDto {
+  count: Int!
+  isActive: Boolean!
+  type: ReactionType!
+}
+
+"""Target entity type for reactions"""
+enum ReactionTargetType {
+  ARTICLE
+  COMMENT
+  PROFILE
+}
+
+"""Reaction type enum"""
+enum ReactionType {
+  ANGRY
+  BOOKMARK
+  CLOWN
+  FIRE
+  LAUGH
+  LIKE
+  LOVE
+  POOP
+  SAD
+  WOW
 }
 
 input RegisterInput {
@@ -193,13 +234,18 @@ enum SortOrder {
   DESC
 }
 
+input ToggleReactionInput {
+  targetId: ID!
+  targetType: ReactionTargetType!
+  type: ReactionType!
+}
+
 input UpdateArticleInput {
   authorId: String
   categoryId: String
   content: JSON
   coverImage: String
   description: String
-  likes: Int = 0
   published: Boolean = false
   publishedAt: DateTime
   readingTime: Int = 0

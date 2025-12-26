@@ -23,14 +23,10 @@ export class CommentResolver {
 		return this.commentService.create(authorId, createCommentInput)
 	}
 
-	@Query(() => [Comment], { name: 'comment' })
-	findAll() {
-		return this.commentService.findAll()
-	}
-
+	
 	@Query(() => Comment, { name: 'comment' })
-	findOne(@Args('id', { type: () => Int }) id: string) {
-		return this.commentService.findOne(id)
+	getComment(@Args('id', { type: () => Int }) id: string) {
+		return this.commentService.getComment(id)
 	}
 
 	@Authorization()
@@ -47,7 +43,7 @@ export class CommentResolver {
 	}
 
 	@Authorization()
-	@Mutation(() => Comment)
+	@Mutation(() => Boolean)
 	removeComment(
 		@Authorized('id') userId: string,
 		@Args('id', { type: () => String }) id: string,

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { ReactionTargetType } from '@prisma/client'
 
-import { UploadService } from '@/modules/upload/upload.service'
-
+import { ReactionService } from '../reaction/reaction.service'
 import { ContentProcessorService } from './services/content-processor.service'
 import { PrismaService } from '@/core/prisma/prisma.service'
 
@@ -19,7 +19,7 @@ export class ArticleService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly contentProcessor: ContentProcessorService,
-		private readonly uploadService: UploadService,
+		private readonly reactionService: ReactionService,
 	) {}
 
 	async create(input: CreateArticleInput) {
@@ -157,9 +157,6 @@ export class ArticleService {
 			case ArticleSortBy.CREATED_AT:
 				orderBy.push({ createdAt: orderDir })
 				break
-			case ArticleSortBy.LIKES:
-				orderBy.push({ likes: orderDir })
-				break
 			case ArticleSortBy.VIEWS:
 				orderBy.push({ views: orderDir })
 				break
@@ -189,46 +186,100 @@ export class ArticleService {
 			},
 		})
 
-		// Мапим результат, чтобы в GraphQL отдавать удобное поле commentsCount
-		return articles.map(a => {
-			const commentsCount =
-				(a as any)._count?.comments ?? a.comments?.length ?? 0
-			return {
-				...a,
-				commentsCount,
-			}
-		})
+		const articleIds = articles.map(a => a.id)
+
+		const reactionsMap =
+			await this.reactionService.getReactionsSummaryForTargets(
+				ReactionTargetType.ARTICLE,
+				articleIds,
+			)
+
+		return articles.map(a => ({
+			...a,
+			commentsCount: a._count?.comments ?? 0,
+			reactions: reactionsMap[a.id] ?? {},
+		}))
 	}
 
-	async findBySlug(slug: string) {
+	async findBySlug(slug: string, userId?: string) {
 		const article = await this.prisma.article.findUnique({
 			where: { slug },
 			include: {
 				author: true,
 				category: true,
-				comments: { include: { author: true } },
-				_count: { select: { comments: true } },
+				comments: {
+					include: {
+						author: true,
+					},
+				},
+				_count: {
+					select: { comments: true },
+				},
 			},
 		})
 
 		if (!article) {
-			throw new NotFoundException(`Article with id ${slug} not found`)
+			throw new NotFoundException(`Article with slug ${slug} not found`)
+		}
+
+		// --- Article reactions ---
+		const articleReactions =
+			await this.reactionService.getReactionsSummaryForTargets(
+				ReactionTargetType.ARTICLE,
+				[article.id],
+			)
+
+		// --- Comment reactions ---
+		const commentIds = article.comments.map(c => c.id)
+
+		const commentReactions =
+			commentIds.length > 0
+				? await this.reactionService.getReactionsSummaryForTargets(
+						ReactionTargetType.COMMENT,
+						commentIds,
+					)
+				: {}
+
+		let myCommentReactions: Record<string, Record<string, boolean>> = {}
+
+		if (userId && commentIds.length > 0) {
+			myCommentReactions =
+				await this.reactionService.getUserReactionsForTargets(
+					userId,
+					ReactionTargetType.COMMENT,
+					commentIds,
+				)
 		}
 
 		return {
 			...article,
-			commentsCount:
-				(article as any)._count?.comments ?? article.comments?.length ?? 0,
+			commentsCount: article._count?.comments ?? 0,
+			reactions: articleReactions[article.id] ?? {},
+			comments: article.comments.map(comment => ({
+				...comment,
+				reactions: commentReactions[comment.id] ?? {},
+				myReactions: myCommentReactions[comment.id] ?? {},
+			})),
 		}
 	}
 
-	async remove(slug: string) {
-		// проверка на существование
-		await this.findBySlug(slug)
+	async remove(slug: string): Promise<boolean> {
+		const article = await this.findBySlug(slug)
 
-		return this.prisma.article.delete({
-			where: { slug },
-		})
+		// Атомарно удаляем и статью и все связанные c ней реакции
+		await this.prisma.$transaction([
+			this.prisma.reaction.deleteMany({
+				where: {
+					targetType: ReactionTargetType.ARTICLE,
+					targetId: article.id,
+				},
+			}),
+			this.prisma.article.delete({
+				where: { slug },
+			}),
+		])
+
+		return true
 	}
 
 	private async validateRelations(

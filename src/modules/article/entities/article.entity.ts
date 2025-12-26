@@ -46,8 +46,11 @@ export class Article {
 	@Field()
 	views: number
 
-	@Field()
-	likes: number
+	@Field(() => GraphQLJSON, { nullable: true })
+	reactions?: Record<string, number> // { LIKE: 10, LOVE: 5, FIRE: 2 }
+
+	@Field(() => GraphQLJSON, { nullable: true })
+	myReactions?: Record<string, boolean> // { LIKE: true }
 
 	@Field(() => Int, { nullable: true })
 	commentsCount?: number
