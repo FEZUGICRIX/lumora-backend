@@ -41,13 +41,29 @@ model Article {
   categoryId String?   @map("category_id")
 
   // 🔗 Комментарии
-  comments Comment[]
+  comments     Comment[]
+  articleViews ArticleView[]
 
   @@index([tags], type: Gin)
   @@index([slug])
   @@index([publishedAt])
   @@index([authorId])
   @@map("articles")
+}
+
+model ArticleView {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+  @@index([ip])
 }
 
 model User {

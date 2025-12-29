@@ -12,7 +12,7 @@ import { UpdateArticleInput } from './dto/update-article.input'
 import { ArticleSortBy } from './enums/article.enums'
 import { SortOrder } from '@/core/graphql/enums'
 
-import { generateSlug } from '@/shared/utils'
+import { generateSlug, hoursAgo } from '@/shared/utils'
 
 @Injectable()
 export class ArticleService {
@@ -53,6 +53,7 @@ export class ArticleService {
 				contentJson: content, // Сохраняем оригинальный JSON
 				contentHtml: processedContent.html, // Генерируем HTML
 				contentText: processedContent.text, // Генерируем текстовую версию
+				readingTime: processedContent.stats.readingTime,
 				...articleData,
 				author: {
 					connect: { id: authorId },
@@ -82,23 +83,23 @@ export class ArticleService {
 			)
 		}
 
-		const data: any = {
+		const data = {
 			...(input.title && { title: input.title }),
-			...(input.coverImage && { coverImage: input.coverImage }),
-			// ...(newSlug && { slug: newSlug }),
+			...(input.coverImage
+				? { coverImage: input.coverImage }
+				: { coverImage: null }),
 			...(input.description !== undefined && {
 				description: input.description,
 			}),
 			...(input.tags && { tags: input.tags }),
 			...(input.categoryId && { categoryId: input.categoryId }),
-			// ...(input.status && { status: input.status }),
 			...(processedContent && {
 				contentJson: processedContent.json,
 				contentHtml: processedContent.html,
 				contentText: processedContent.text,
-				wordCount: processedContent.wordCount,
-				characterCount: processedContent.characterCount,
-				readingTime: processedContent.readingTime,
+				readingTime: processedContent.stats.readingTime,
+				// wordCount: processedContent.wordCount,
+				// characterCount: processedContent.characterCount,
 			}),
 		}
 
@@ -293,6 +294,54 @@ export class ArticleService {
 		])
 
 		return true
+	}
+
+	async trackView({
+		articleId,
+		userId,
+		ip,
+		userAgent,
+	}: {
+		articleId: string
+		userId?: string
+		ip?: string
+		userAgent?: string
+	}) {
+		const article = await this.prisma.article.findUnique({
+			where: { id: articleId },
+			select: { id: true },
+		})
+
+		if (!article) throw new NotFoundException('Статья не найдена')
+
+		const or: any[] = []
+		if (userId) or.push({ userId })
+		if (ip) or.push({ ip })
+
+		const alreadyViewed = await this.prisma.articleView.findFirst({
+			where: {
+				articleId,
+				createdAt: { gte: hoursAgo(new Date(), 24) },
+				OR: or.length > 0 ? or : undefined,
+			},
+		})
+
+		if (alreadyViewed) return
+
+		await this.prisma.$transaction([
+			this.prisma.articleView.create({
+				data: {
+					articleId,
+					userId,
+					ip,
+					userAgent,
+				},
+			}),
+			this.prisma.article.update({
+				where: { id: articleId },
+				data: { views: { increment: 1 } },
+			}),
+		])
 	}
 
 	private async validateRelations(

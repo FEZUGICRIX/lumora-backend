@@ -11,6 +11,10 @@ import { StarterKit } from '@tiptap/starter-kit'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import sanitizeHtml from 'sanitize-html'
 
+interface ContentStats {
+	readingTime: number
+}
+
 @Injectable()
 export class ContentProcessorService {
 	private readonly extensions: any[]
@@ -38,7 +42,7 @@ export class ContentProcessorService {
 		json: any
 		html: string
 		text: string
-		// stats: ContentStats;
+		stats: ContentStats
 		// assets: ArticleAsset[];
 	}> {
 		// Валидация входящего контента
@@ -53,13 +57,14 @@ export class ContentProcessorService {
 		// const assets = this.extractAssets(json);
 
 		// // Расчет метрик для UX и аналитики
-		// const stats = this.calculateStats(text, json);
+		const stats = this.calculateStats(text, json)
+
 
 		return {
 			json,
 			html,
 			text,
-			// stats, assets
+			stats,
 		}
 	}
 
@@ -154,44 +159,44 @@ export class ContentProcessorService {
 	}
 
 	// // 📊 РАСЧЕТ СТАТИСТИК - ДЛЯ ПОЛЬЗОВАТЕЛЬСКОГО ОПЫТА
-	// private calculateStats(text: string, json: any): ContentStats {
-	//   const words = text
-	//     .trim()
-	//     .split(/\s+/)
-	//     .filter((word) => word.length > 0);
-	//   const characters = text.replace(/\s+/g, '').length;
-	//   const blocks = this.countBlocks(json);
+	private calculateStats(text: string, json: any) {
+		const words = text
+			.trim()
+			.split(/\s+/)
+			.filter(word => word.length > 0)
+		// const characters = text.replace(/\s+/g, '').length
+		// const blocks = this.countBlocks(json)
 
-	//   return {
-	//     wordCount: words.length,
-	//     characterCount: characters,
-	//     readingTime: Math.max(1, Math.ceil(words.length / 200)), // мин. 1 минута
-	//     blockCount: blocks,
-	//   };
-	// }
+		return {
+			readingTime: Math.max(1, Math.ceil(words.length / 200)), // мин. 1 минута
+			// wordCount: words.length,
+			// characterCount: characters,
+			// blockCount: blocks,
+		}
+	}
 
 	// // 🔍 ПОДСЧЕТ БЛОКОВ - ДЛЯ АНАЛИЗА СТРУКТУРЫ
-	// private countBlocks(content: any): number {
-	//   if (!content.content) return 0;
+	private countBlocks(content: any): number {
+		if (!content.content) return 0
 
-	//   const countBlocksRecursive = (nodes: any[]): number => {
-	//     return nodes.reduce((count, node) => {
-	//       if (
-	//         ['paragraph', 'heading', 'blockquote', 'codeBlock'].includes(
-	//           node.type,
-	//         )
-	//       ) {
-	//         return count + 1;
-	//       }
-	//       if (node.content && Array.isArray(node.content)) {
-	//         return count + countBlocksRecursive(node.content);
-	//       }
-	//       return count;
-	//     }, 0);
-	//   };
+		const countBlocksRecursive = (nodes: any[]): number => {
+			return nodes.reduce((count, node) => {
+				if (
+					['paragraph', 'heading', 'blockquote', 'codeBlock'].includes(
+						node.type,
+					)
+				) {
+					return count + 1
+				}
+				if (node.content && Array.isArray(node.content)) {
+					return count + countBlocksRecursive(node.content)
+				}
+				return count
+			}, 0)
+		}
 
-	//   return countBlocksRecursive(content.content);
-	// }
+		return countBlocksRecursive(content.content)
+	}
 
 	// // 🖼️ ИЗВЛЕЧЕНИЕ МЕДИА - ДЛЯ УПРАВЛЕНИЯ ФАЙЛАМИ
 	// private extractAssets(content: any): ArticleAsset[] {

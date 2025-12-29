@@ -79,7 +79,6 @@ input CreateArticleInput {
   description: String
   published: Boolean! = false
   publishedAt: DateTime
-  readingTime: Int! = 0
   tags: [String!]! = []
   title: String!
   views: Int! = 0
@@ -131,6 +130,7 @@ type Mutation {
   removeComment(id: String!): Boolean!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   toggleReaction(input: ToggleReactionInput!): Boolean!
+  trackArticleView(articleId: String!): Boolean!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateComment(updateCommentInput: UpdateCommentInput!): Comment!
@@ -248,7 +248,6 @@ input UpdateArticleInput {
   description: String
   published: Boolean = false
   publishedAt: DateTime
-  readingTime: Int = 0
   slug: String!
   tags: [String!] = []
   title: String

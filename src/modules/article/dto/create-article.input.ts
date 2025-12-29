@@ -7,6 +7,7 @@ import {
 	IsObject,
 	IsOptional,
 	IsString,
+	IsUrl,
 } from 'class-validator'
 import { GraphQLJSON } from 'graphql-scalars'
 
@@ -31,8 +32,9 @@ export class CreateArticleInput {
 	tags: string[]
 
 	@Field({ nullable: true })
-	@IsOptional()
 	@IsString()
+	@IsOptional()
+	@IsUrl()
 	coverImage?: string
 
 	@Field({ defaultValue: false })
@@ -43,10 +45,6 @@ export class CreateArticleInput {
 	@IsOptional()
 	@IsDate()
 	publishedAt?: Date
-
-	@Field(() => Int, { defaultValue: 0 })
-	@IsInt()
-	readingTime: number
 
 	@Field(() => Int, { defaultValue: 0 })
 	@IsInt()
