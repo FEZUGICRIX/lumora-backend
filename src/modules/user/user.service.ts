@@ -1,9 +1,10 @@
+import { AuthMethod, Prisma, User } from '@prisma/generated'
+
 import {
 	BadRequestException,
 	ConflictException,
 	Injectable,
 } from '@nestjs/common'
-import { AuthMethod, Prisma, User } from '@prisma/client'
 
 import { UsernameService } from './services/username.service'
 import { PrismaService } from '@/core/prisma/prisma.service'

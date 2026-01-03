@@ -1,5 +1,6 @@
+import { ReactionType } from '@prisma/generated'
+
 import { Field, Int, ObjectType } from '@nestjs/graphql'
-import { ReactionType } from '@prisma/client'
 
 @ObjectType()
 export class ReactionSummaryDto {

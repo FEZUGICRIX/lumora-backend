@@ -25,10 +25,10 @@ export const ResetPasswordTemplate = ({
   const confirmLink = `${domain}/auth/new-password?token=${token}`;
 
   return (
-    <Tailwind>
+    <Tailwind children={
       <Html>
         <Head />
-        <Preview>Сброс пароля — Lumora</Preview>
+        <Preview children='Сброс пароля — Lumora' />
         <Body className="bg-gray-50 font-sans text-gray-800">
           <Container className="max-w-[480px] mx-auto my-10 p-8 rounded-2xl bg-white shadow-lg border border-gray-200">
             <Section className="text-center">
@@ -81,7 +81,8 @@ export const ResetPasswordTemplate = ({
             </Section>
           </Container>
         </Body>
-      </Html>
-    </Tailwind>
+      </Html>}
+
+    />
   );
 };

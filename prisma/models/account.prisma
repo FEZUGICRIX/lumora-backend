@@ -1,0 +1,24 @@
+model Account {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String    @map("provider_account_id")
+
+  refreshToken       String?   @map("refresh_token")
+  accessToken        String?   @map("access_token")
+  expiresAt          DateTime? @map("expires_at")
+  tokenType          String?   @map("token_type")
+  scope              String?
+  idToken            String?   @map("id_token")
+  sessionState       String?   @map("session_state")
+
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}

@@ -1,3 +1,5 @@
+import { Token, TokenType, User } from '@prisma/generated'
+
 import {
 	BadRequestException,
 	forwardRef,
@@ -5,14 +7,14 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common'
-import { Token, TokenType, User } from '@prisma/client'
 import type { Request } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
-import { AuthService } from '../auth.service'
-import { PrismaService } from '@/core/prisma/prisma.service'
 import { MailService } from '@/modules/mail/mail.service'
 import { UserService } from '@/modules/user/user.service'
+
+import { AuthService } from '../auth.service'
+import { PrismaService } from '@/core/prisma/prisma.service'
 
 import { ConfirmationInput } from './dto/email-confirmation.input'
 

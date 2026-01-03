@@ -1,5 +1,6 @@
+import { AuthMethod, UserRole } from '@prisma/generated'
+
 import { Field, InputType } from '@nestjs/graphql'
-import { AuthMethod, UserRole } from '@prisma/client'
 import {
 	IsBoolean,
 	IsEmail,

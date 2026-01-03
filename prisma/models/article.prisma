@@ -1,0 +1,36 @@
+model Article {
+  id            String    @id @default(uuid())
+  title         String
+  slug          String    @unique
+  description   String
+  tags          String[]  @default([])
+  contentJson   Json      @map("content_json")
+  contentHtml   String    @map("content_html")
+  contentText   String    @map("content_text")
+  coverImage    String?   @map("cover_image")
+  published     Boolean   @default(false)
+  publishedAt   DateTime? @map("published_at")
+  readingTime   Int       @default(0) @map("reading_time")
+  wordCount     Int       @default(0) @map("word_count")
+  views         Int       @default(0)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  // Relations
+  author        User      @relation(fields: [authorId], references: [id])
+  authorId      String    @map("author_id")
+
+  category      Category? @relation(fields: [categoryId], references: [id])
+  categoryId    String?   @map("category_id")
+
+  comments      Comment[]
+  articleViews  ArticleView[]
+
+  @@index([tags], type: Gin)
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([authorId])
+  @@map("articles")
+}

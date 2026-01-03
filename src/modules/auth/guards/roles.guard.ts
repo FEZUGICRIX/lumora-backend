@@ -1,3 +1,5 @@
+import { UserRole } from '@prisma/generated'
+
 import {
 	CanActivate,
 	ExecutionContext,
@@ -7,7 +9,6 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { UserRole } from '@prisma/client'
 
 import { ROLES_KEY } from '../decorators/roles.decorator'
 

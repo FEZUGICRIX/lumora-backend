@@ -1,10 +1,11 @@
-import { registerEnumType } from '@nestjs/graphql'
 import {
 	AuthMethod,
 	ReactionTargetType,
 	ReactionType,
 	UserRole,
-} from '@prisma/client'
+} from '@prisma/generated'
+
+import { registerEnumType } from '@nestjs/graphql'
 
 registerEnumType(UserRole, {
 	name: 'UserRole',

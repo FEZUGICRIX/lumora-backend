@@ -1,3 +1,5 @@
+import { AuthMethod, Prisma, User, UserRole } from '@prisma/generated'
+
 import {
 	BadRequestException,
 	ConflictException,
@@ -9,7 +11,6 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { AuthMethod, Prisma, User, UserRole } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { UserService } from '@/modules/user/user.service'

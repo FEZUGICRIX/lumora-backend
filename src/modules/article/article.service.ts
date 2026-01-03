@@ -1,5 +1,6 @@
+import { ReactionTargetType } from '@prisma/generated'
+
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { ReactionTargetType } from '@prisma/client'
 
 import { ReactionService } from '../reaction/reaction.service'
 import { ContentProcessorService } from './services/content-processor.service'

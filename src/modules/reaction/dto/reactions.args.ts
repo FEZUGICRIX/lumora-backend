@@ -1,5 +1,6 @@
+import { ReactionTargetType } from '@prisma/generated'
+
 import { ArgsType, Field } from '@nestjs/graphql'
-import { ReactionTargetType } from '@prisma/client'
 import { IsEnum, IsUUID } from 'class-validator'
 
 @ArgsType()

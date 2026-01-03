@@ -1,10 +1,18 @@
 import { faker } from '@faker-js/faker'
-
-import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '@prisma/generated'
 
 import { HashService } from '../src/modules/auth/services/hash.service'
 
-const prisma = new PrismaClient()
+const POSTGRES_URI = process.env.POSTGRES_URI
+if (!POSTGRES_URI) {
+	throw new Error('❌ POSTGRES_URI is not defined')
+}
+
+const adapter = new PrismaPg({
+	connectionString: POSTGRES_URI,
+})
+const prisma = new PrismaClient({ adapter })
 
 // Инициализация HashService для хеширования паролей
 const hashService = new HashService()

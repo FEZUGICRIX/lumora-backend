@@ -1,12 +1,14 @@
+import { Token, TokenType } from '@prisma/generated'
+
 import {
 	BadRequestException,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common'
-import { Token, TokenType } from '@prisma/client'
+
+import { MailService } from '@/modules/mail/mail.service'
 
 import { PrismaService } from '@/core/prisma/prisma.service'
-import { MailService } from '@/modules/mail/mail.service'
 
 @Injectable()
 export class TwoFactorAuthService {

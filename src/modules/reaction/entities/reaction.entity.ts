@@ -1,5 +1,6 @@
+import { ReactionTargetType, ReactionType } from '@prisma/generated'
+
 import { Field, ID, ObjectType } from '@nestjs/graphql'
-import { ReactionTargetType, ReactionType } from '@prisma/client'
 import { IsEnum } from 'class-validator'
 
 import { UserPublicProfile } from '@/modules/user/entities/user-public-profile.entity'

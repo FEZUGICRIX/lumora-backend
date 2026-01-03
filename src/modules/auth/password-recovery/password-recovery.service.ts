@@ -1,16 +1,18 @@
+import { Token, TokenType } from '@prisma/generated'
+
 import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
 	UnauthorizedException,
 } from '@nestjs/common'
-import { Token, TokenType } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+
+import { MailService } from '@/modules/mail/mail.service'
+import { UserService } from '@/modules/user/user.service'
 
 import { HashService } from '../services/hash.service'
 import { PrismaService } from '@/core/prisma/prisma.service'
-import { MailService } from '@/modules/mail/mail.service'
-import { UserService } from '@/modules/user/user.service'
 
 import { NewPasswordInput } from './dto/new-password.input'
 import { ResetPasswordInput } from './dto/reset-password.input'

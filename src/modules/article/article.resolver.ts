@@ -1,5 +1,6 @@
+import { type User } from '@prisma/generated'
+
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { type User } from '@prisma/client'
 import { Request } from 'express'
 
 import { ArticleService } from './article.service'

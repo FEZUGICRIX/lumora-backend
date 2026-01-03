@@ -1,0 +1,36 @@
+model Reaction {
+  id         String              @id @default(uuid())
+  type       ReactionType
+  userId     String
+  targetId   String
+  targetType ReactionTargetType
+  createdAt  DateTime            @default(now())
+
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetId, targetType])
+  @@index([targetId, type])
+  @@index([targetId, targetType])
+  @@index([targetType])
+  @@index([userId])
+  @@map("reactions")
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  FIRE
+  BOOKMARK
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+  POOP
+  CLOWN
+}
+
+enum ReactionTargetType {
+  ARTICLE
+  COMMENT
+  PROFILE
+}

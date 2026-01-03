@@ -1,5 +1,6 @@
+import { UserRole } from '@prisma/generated'
+
 import { Field, ID, ObjectType } from '@nestjs/graphql'
-import { UserRole } from '@prisma/client'
 import { GraphQLJSON } from 'graphql-scalars'
 
 // Назначение: Публичное представление профиля. Используется для отображения

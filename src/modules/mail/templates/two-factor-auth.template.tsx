@@ -23,10 +23,10 @@ export const TwoFactorAuthTemplate = ({
   domain,
 }: TwoFactorAuthProps) => {
   return (
-    <Tailwind>
+    <Tailwind children={
       <Html>
         <Head />
-        <Preview>Двухфакторная аутентификация — Lumora</Preview>
+        <Preview children='Двухфакторная аутентификация — Lumora'></Preview>
         <Body className="bg-gray-50 font-sans text-gray-800">
           <Container className="max-w-[480px] mx-auto my-10 p-8 rounded-2xl bg-white shadow-lg border border-gray-200">
             <Section className="text-center">
@@ -71,6 +71,7 @@ export const TwoFactorAuthTemplate = ({
           </Container>
         </Body>
       </Html>
-    </Tailwind>
+    }
+    />
   );
 };

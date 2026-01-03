@@ -1,5 +1,6 @@
+import { AuthMethod, UserRole } from '@prisma/generated'
+
 import { Field, ID, ObjectType } from '@nestjs/graphql'
-import { AuthMethod, UserRole } from '@prisma/client'
 import { GraphQLJSON } from 'graphql-scalars'
 
 // Назначение: Полный, приватный профиль. Используется исключительно для запросов

@@ -1,9 +1,10 @@
+import { Comment, ReactionTargetType } from '@prisma/generated'
+
 import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common'
-import { Comment, ReactionTargetType } from '@prisma/client'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
 import { ReactionService } from '../reaction/reaction.service'

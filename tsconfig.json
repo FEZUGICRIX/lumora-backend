@@ -22,7 +22,8 @@
 		"noFallthroughCasesInSwitch": false,
 		"jsx": "react",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@prisma/generated": ["./prisma/generated/prisma/client"]
 		}
 	}
 }
